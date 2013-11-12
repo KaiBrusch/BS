@@ -1,6 +1,5 @@
 
-#include "main.h"
-#include <stdio.h>
+#include "header.h"
 
 
 // die Monitorfunktionen sind die get_sticks und put_sticks // sie arbeiten mit den kritischen Abschnitten

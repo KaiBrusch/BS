@@ -7,11 +7,11 @@
 //
 
 #include <stdio.h>
-#include "Header.h"
+#include "header.h"
 
 void get_sticks(int pID){
 
-    pthread_mutex_lock(mutex[pID]); // der Kritische abschnitt wird gesperrt
+    pthread_mutex_lock(&(mutex[pID])); // der Kritische abschnitt wird gesperrt
 
     philStates[pID]= HUNGRY; // Der Zustand des Philosophen wird auf Hungry gesetzt
 

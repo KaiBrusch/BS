@@ -4,10 +4,10 @@ LDFLAGS=-pthread
 
 all: philo
 
-main.o: main.c main.h
+main.o: main.c header.h
 	$(CC) -c $(CCFLAGS) -o main.o main.c
 
-monitor.o: monitor.c main.h
+monitor.o: monitor.c header.h
 	$(CC) -c $(CCFLAGS) -o monitor.o monitor.c
 
 philo: main.o monitor.o
