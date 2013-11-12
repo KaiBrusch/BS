@@ -48,11 +48,10 @@
 // DECLERATIONS
 void init();
 void inputLoop();
-void* philo(void *arg);
-char *get_line(char *s, size_t n, FILE *f);
 sem_t *mutex[NPH];
 pthread_mutex_t *pthread_mutex[NPH];
 int thread_mng[NPH];
+char *get_line(char *s, size_t n, FILE *f);
 
 // TODO: outsource declarations
 // TODO: coderichtlinien von FOHL
