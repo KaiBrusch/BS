@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8097D024182E6302009BFF62 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 8097D023182E6302009BFF62 /* main.c */; };
 		8097D026182E6302009BFF62 /* betriebssysteme.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8097D025182E6302009BFF62 /* betriebssysteme.1 */; };
+		80E5D69B18321377001C7E51 /* monitor.c in Sources */ = {isa = PBXBuildFile; fileRef = 80E5D69A18321377001C7E51 /* monitor.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +29,9 @@
 		8097D020182E6302009BFF62 /* betriebssysteme */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = betriebssysteme; sourceTree = BUILT_PRODUCTS_DIR; };
 		8097D023182E6302009BFF62 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		8097D025182E6302009BFF62 /* betriebssysteme.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = betriebssysteme.1; sourceTree = "<group>"; };
+		80E5D69918321326001C7E51 /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
+		80E5D69A18321377001C7E51 /* monitor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = monitor.c; sourceTree = "<group>"; };
+		80E5D69C1832138F001C7E51 /* monitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = monitor.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +66,9 @@
 			children = (
 				8097D023182E6302009BFF62 /* main.c */,
 				8097D025182E6302009BFF62 /* betriebssysteme.1 */,
+				80E5D69918321326001C7E51 /* main.h */,
+				80E5D69A18321377001C7E51 /* monitor.c */,
+				80E5D69C1832138F001C7E51 /* monitor.h */,
 			);
 			path = betriebssysteme;
 			sourceTree = "<group>";
@@ -118,6 +125,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8097D024182E6302009BFF62 /* main.c in Sources */,
+				80E5D69B18321377001C7E51 /* monitor.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,6 +224,7 @@
 				8097D02B182E6302009BFF62 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -4,66 +4,8 @@
 #include <string.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <regex.h>
-
-
-// Konstanten zur Kommunikation welches
-// Kommando welcher Philosoph vom Benutzer erhalten hat
-#define BLOCK 1
-#define PROCEED 2
-#define UNBLOCK 3
-#define DEFAULT 0
-
-// Philosopher states
-#define THINK   0
-#define HUNGRY  1
-#define EAT     2
-
-#define NPH 5
-
-// LOOP durations
-#define THINKLOOP   1000000000
-#define EATLOOP      500000000
-
-// sonstige
-#define INPUTLEN 140
-#define ASCII_NUM_OFFSET 48
-
-// STICK CONSTANTS
-#define IN_USE      1
-#define AVAILIBLE   0
-
-// BOOLEAN
-#define TRUE 1
-#define FALSE 0
-
-// DECLERATIONS
-void init();
-void inputLoop();
-void* philo(void *arg);
-char *get_line(char *s, size_t n, FILE *f);
-int isBlockCommand(char* x);
-sem_t mutex;
-int thread_mng[NPH];
-void disp_philo_states();
-void get_sticks(int pID);   // Funktionen zum Nehemn und Legen der Sticks des Philosophen mit der pID
-void put_sticks(int pID);
-
-// TODO: outsource declarations
-// TODO: coderichtlinien von FOHL
-
-// Initialisierung der globalen Daten
-const char *philosNamos[NPH] = {"Kierkegaard","Descartes","Tolstoy","Mochizuki","Goedel"};
-int sticks[NPH-1];      // es gibt einen sStick weniger als es Philosophen gibt
-int philStates[NPH];    // all the threads write their philosophers sate into this array for easier display
-
-// The class Philosopher
-typedef struct Phil {
-    const int id;
-    const char *name;
-    const int l_stk_id;
-    const int r_stk_id;
-} Philosopher;
+#include <monitor.h>
+#include "main.h"
 
 
 // die Monitorfunktionen sind die get_sticks und put_sticks // sie arbeiten mit den kritischen Abschnitten
@@ -80,6 +22,9 @@ void init() {
     // for each philosopher
 	for(int i=0; i<NPH; i++ ) {
         thread_mng[i] = DEFAULT;        // no default commandos
+        
+        // creation of the philosopher
+        Philosopher philosMios = {i,philosNamos[i]};
         
         // create threads, give the corresponding ID
         pthread_t tid;
@@ -150,13 +95,12 @@ void inputLoop(){
 
 // philosophers thread function
 void *philo(void *arg){
-    int pID = ((int)arg);
-    
-    // creation of the philosopher
-    Philosopher philosMios = {pID,philosNamos[pID]};
-    printf("%s", philosMios.name);
+//Philosopher myphilo = ((Philosopher)arg);
+    int pID = (int)arg;
     
     // TODO: threads commandos ausfuehren
+    
+//printf("%s", myphilo.name);
     
     while (1) {
         // first state is THINK
