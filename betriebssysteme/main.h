@@ -5,6 +5,13 @@
 //  Created by kbrusch on 11/12/13.
 //  Copyright (c) 2013 kbrusch. All rights reserved.
 //
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include "monitor.h"
 
 // Konstanten zur Kommunikation welches
 // Kommando welcher Philosoph vom Benutzer erhalten hat
@@ -12,6 +19,8 @@
 #define PROCEED 2
 #define UNBLOCK 3
 #define DEFAULT 0
+#define JOIN 4
+#define FINISHED 5
 
 // Philosopher states
 #define THINK   0
@@ -41,7 +50,8 @@ void init();
 void inputLoop();
 void* philo(void *arg);
 char *get_line(char *s, size_t n, FILE *f);
-sem_t mutex;
+sem_t *mutex[NPH];
+pthread_mutex_t *pthread_mutex[NPH];
 int thread_mng[NPH];
 
 // TODO: outsource declarations

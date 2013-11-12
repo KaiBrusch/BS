@@ -8,35 +8,22 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "betriebssysteme/main.c"
-         timestampString = "405935235.429885"
+         timestampString = "405938894.522243"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "97"
-         endingLineNumber = "97">
+         startingLineNumber = "41"
+         endingLineNumber = "41">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "betriebssysteme/main.c"
-         timestampString = "405935235.429885"
+         timestampString = "405938894.522243"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "50"
-         endingLineNumber = "50"
-         landmarkName = "inputLoop()"
-         landmarkType = "7">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "betriebssysteme/main.c"
-         timestampString = "405935235.429885"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "98"
-         endingLineNumber = "98"
+         startingLineNumber = "42"
+         endingLineNumber = "42"
          landmarkName = "philo()"
          landmarkType = "7">
       </FileBreakpoint>

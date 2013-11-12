@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <monitor.h>
+
 #include "main.h"
 
 
@@ -26,23 +20,63 @@ void init() {
         // creation of the philosopher
         Philosopher philosMios = {i,philosNamos[i]};
         
+        int res = sem_init(mutex[i], 0, 1);
+        if(res != 0){
+            perror("Semaphore initialization failed\n");
+            exit(EXIT_FAILURE);
+        }
+        
         // create threads, give the corresponding ID
         pthread_t tid;
-        int res = pthread_create(&tid, NULL, &philo, (void *)i);
+        res = pthread_create(&tid, NULL, &philo, (void *)&philosMios);
         if(res!=0){
-            perror("Thred not created.");
+            perror("Thred not created.\n");
             exit(EXIT_FAILURE);
         }
     }
 }
 
-void get_sticks(int pID){
-    // TODO: write it
+
+// philosophers thread function
+void *philo(void *arg){
+    Philosopher *p = (Philosopher*)arg;
+    int pID = p->id;
+    
+    printf("%s\n", p->name);
+    
+    while (1) {
+        // first state is THINK
+        for(int c=0;c<THINKLOOP;c++){
+            if(thread_mng[pID] == PROCEED){
+                break;
+            }
+        }
+        
+        // third state is EAT
+        get_sticks(pID);
+        for(int c=0;c<EATLOOP;c++){
+            if(thread_mng[pID] == PROCEED){
+                thread_mng[pID] = DEFAULT;
+                break;
+            }
+            else if (thread_mng[pID] == JOIN){
+                thread_mng[pID] = FINISHED;
+                pthread_join((pthread_t)pID, NULL);
+                sem_destroy(mutex[pID]);
+                pthread_exit(0);
+            }
+            else if(thread_mng[pID] == BLOCK){
+                sem_wait(mutex[pID]);
+                thread_mng[pID] = DEFAULT;
+            }
+        }
+        put_sticks(pID);
+        
+        // next state again becomes THINK
+        
+    }
 }
 
-void put_sticks(int pID){
-    // TODO: write it
-}
 
 void inputLoop(){
 	while(TRUE){
@@ -56,8 +90,15 @@ void inputLoop(){
         
         // FAll: quit
         if(x[0] == 'q' || x[0] == 'Q') {
-            // alle threads mit pthread_join
-            // synchronisationsobjekte loeschen
+            
+            for(int j = 0; j < NPH; j++){
+                //
+                thread_mng[j] = JOIN;
+                
+                // synchronisationsobjekte loeschen
+            }
+            
+            
             printf("Quit!");
             exit(EXIT_SUCCESS);
         }
@@ -89,35 +130,6 @@ void inputLoop(){
 	}
     
 }
-
-
-
-
-// philosophers thread function
-void *philo(void *arg){
-//Philosopher myphilo = ((Philosopher)arg);
-    int pID = (int)arg;
-    
-    // TODO: threads commandos ausfuehren
-    
-//printf("%s", myphilo.name);
-    
-    while (1) {
-        // first state is THINK
-        for(int c=0;c<THINKLOOP;c++){}
-        
-        // second state in HUNGRY
-        
-        // third state is EAT
-        get_sticks(pID);
-        for(int c=0;c<EATLOOP;c++){}
-        put_sticks(pID);
-        
-        
-        // next state again becomes THINK
-    }
-}
-
 
 // Helping function to abstract away the readLine
 char *get_line(char *s, size_t n, FILE *f) {

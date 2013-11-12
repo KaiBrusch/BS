@@ -7,4 +7,12 @@
 //
 
 #include <stdio.h>
-#include "main.h"
+
+void get_sticks(int pID){
+    
+}
+
+
+void put_sticks(int pID){
+    
+}
