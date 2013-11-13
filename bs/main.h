@@ -6,18 +6,16 @@
 // Number of Philosophers
 #define NPHILO 5
 
-// Iterations for EAT and THINK
+// Number of Iterations for EAT and THINK
 #define THINK_LOOP 100000000
 #define EAT_LOOP 500000000
 
-// macro for calculating the
-#define STICK_LINKS(p_id) p_id
-//Ermittelt die ID des Sticks rechts vom Philosophen
-#define STICK_RECHTS(p_id) ((p_id+1)%NPHILO)
-//Ermittelt die ID des rechten Nachbarn des Philosophen
+// macros for calculating the left/right stick/philospher
+#define L_STICK(p_id) p_id
+#define R_STICK(p_id) ((p_id+1)%NPHILO)
 #define PHILO_RECHTS(p_id) ((p_id == NPHILO-1)? 0 : p_id+1)
-//Ermittelt die ID des linken Nachbarn des Philosophen
 #define PHILO_LINKS(p_id) ((p_id == 0)? NPHILO-1 : p_id-1)
+
 //Fuer Zahlenvergleich(ASCII 48 entspricht 0)
 #define ASCII_NUM_OFFSET 48
 //Erlaubte Laenge der Eingabe
@@ -54,3 +52,4 @@ void handle_command(char cmd_char, int p_id);
 // TODO:
 // * check against Styleguide
 // * test against all fallacy cases
+// * add the special compiler flag for the (int)i into the Makefile

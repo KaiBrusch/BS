@@ -12,13 +12,13 @@ void get_sticks(int philoID)
     philo_state[philoID] = HUNGRY;
     disp_philo_states();
 
-    while(stick_state[STICK_LINKS(philoID)] == USED
-          || stick_state[STICK_RECHTS(philoID)] == USED) {
+    while(stick_state[L_STICK(philoID)] == USED
+          || stick_state[R_STICK(philoID)] == USED) {
         pthread_cond_wait(&cond[philoID], &mutex);
     }
 
-    stick_state[STICK_LINKS(philoID)] = USED;
-    stick_state[STICK_RECHTS(philoID)] = USED;
+    stick_state[L_STICK(philoID)] = USED;
+    stick_state[R_STICK(philoID)] = USED;
 
     philo_state[philoID] = EAT;
     disp_philo_states();
@@ -32,8 +32,8 @@ void put_sticks(int philoID)
     philo_state[philoID] = THINK;
     disp_philo_states();
 
-    stick_state[STICK_LINKS(philoID)] = UNUSED;
-    stick_state[STICK_RECHTS(philoID)] = UNUSED;
+    stick_state[L_STICK(philoID)] = UNUSED;
+    stick_state[R_STICK(philoID)] = UNUSED;
 
     //Wecken der Nachbarn
     pthread_cond_signal(&cond[PHILO_LINKS(philoID)]);
