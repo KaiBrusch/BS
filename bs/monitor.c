@@ -1,5 +1,10 @@
 #include "main.h"
 
+extern int philo_state[NPHILO];
+extern int stick_state[NPHILO];
+extern pthread_mutex_t mutex;
+extern pthread_cond_t cond[NPHILO];
+
 void get_sticks(int philoID)
 {
     pthread_mutex_lock(&mutex);

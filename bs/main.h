@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <assert.h>
 
-//Anzahl der Philosophen
+// Number of Philosophers
 #define NPHILO 5
-//Simulieren von THINK durch Zaehlschleife
+
+// Iterations for EAT and THINK
 #define THINK_LOOP 100000000
-//Simulieren von EAT durch Zaehlschleife
 #define EAT_LOOP 500000000
-//Ermittelt die ID des Sticks links vom Philosophen
+
+// macro for calculating the
 #define STICK_LINKS(p_id) p_id
 //Ermittelt die ID des Sticks rechts vom Philosophen
 #define STICK_RECHTS(p_id) ((p_id+1)%NPHILO)
@@ -39,27 +39,6 @@
 #define QUIT 'q'
 #define UNBLOCK 'u'
 
-//Datentyp Boolean
-typedef enum {
-    FALSE = 0,
-    TRUE = 1
-} Boolean;
-
-//Speichert den Zustand der Philosophen
-int philo_state[NPHILO];
-//Speichert den Zustand der Sticks
-int stick_state[NPHILO];
-
-//Mutex
-pthread_mutex_t mutex;
-//Eine Condition Variable je Philosoph
-pthread_cond_t cond[NPHILO];
-//Ein Semaphor je Philosoph
-sem_t semaphoren[NPHILO];
-//Befehle fuer Philosophen werden hier abgespeichert.
-//"q"=quit, "b"=block, "u"=unblock, "p"=proceed, "-"=kein Befehl
-char input_commands[NPHILO];
-
 void *philo(void *arg);
 void think(int p_id);
 void eat(int p_id);
@@ -71,3 +50,7 @@ void init();
 void inputLoop();
 void handle_quit(char first_char);
 void handle_command(char cmd_char, int p_id);
+
+// TODO:
+// * check against Styleguide
+// * test against all fallacy cases

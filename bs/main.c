@@ -1,10 +1,22 @@
 #include "main.h"
 
 
+//Speichert den Zustand der Philosophen
+int philo_state[NPHILO];
+//Speichert den Zustand der Sticks
+int stick_state[NPHILO];
+//Mutex
+pthread_mutex_t mutex;
+//Eine Condition Variable je Philosoph
+pthread_cond_t cond[NPHILO];
+//Ein Semaphor je Philosoph
+sem_t semaphores[NPHILO];
+//Befehle fuer Philosophen werden hier abgespeichert.
+//"q"=quit, "b"=block, "u"=unblock, "p"=proceed, "-"=kein Befehl
+char input_commands[NPHILO];
 pthread_t philo_threads[NPHILO];
 char *ph_name[NPHILO] = {"Goedel", "Aristoteles", "Tolstoy", "Mochizuki", "Plato"};
 
-// Fehlerfaelle testen
 int main(void)
 {
     init();
@@ -42,7 +54,7 @@ void handle_quit(char first_char){
         
         for(int i = 0; i < NPHILO; i++) {
             input_commands[i] = 'q';
-            sem_post(&semaphoren[i]);
+            sem_post(&semaphores[i]);
         }
         for(int i = 0; i < NPHILO; i++) {
             pthread_cond_signal(&cond[i]);
@@ -53,7 +65,7 @@ void handle_quit(char first_char){
         //Entfernen der Synchronisationsobjekte
         for(int i = 0; i < NPHILO; i++) {
             pthread_cond_destroy(&cond[i]);
-            sem_destroy(&semaphoren[i]);
+            sem_destroy(&semaphores[i]);
             printf("%s (%d) was killed.\n", ph_name[i], i);
         }
         pthread_mutex_destroy(&mutex);
@@ -79,7 +91,7 @@ void handle_command(char cmd_char, int p_id){
                 
             case UNBLOCK:
                 printf("Unblock %s (%d).\n", ph_name[p_id], p_id);
-                sem_post(&semaphoren[p_id]);
+                sem_post(&semaphores[p_id]);
                 break;
                 
             case PROCEED:
@@ -117,14 +129,14 @@ void *philo(void *p_id)
 }
 
 
-//Ueberprueft ob der Thread blockiert ist.
+// Check if the philo is to be blocked and block it. (is called by the corresponding thread)
 void block_philo(int philoID){
     if(input_commands[philoID] == BLOCK) {
-        sem_wait(&semaphoren[philoID]);
+        sem_wait(&semaphores[philoID]);
     }
 }
 
-//Simulieren von THINK durch Zaehlschleife
+// THINK is a idleloop. If a BLOCK or PROCEED commad has come, it'll block itself or quit the loop.
 void think(int philoID){
     int i;
     for(i = 0; i < THINK_LOOP; i++) {
@@ -136,7 +148,7 @@ void think(int philoID){
     }
 }
 
-//Simulieren von EAT durch Zaehlschleife
+// EAT idleloop. Mostly equal to as think(...).
 void eat(int philoID) {
     int i;
     for(i = 0; i < EAT_LOOP; i++) {
@@ -150,14 +162,17 @@ void eat(int philoID) {
 
 
 
+// Initialize
 void init(){
     
     int result;
     
-    //Initialize
+	// initialize for pthread_cond... set default values and initializse semaphores
     for(int i = 0; i < NPHILO; i++) {
         philo_state[i] = THINK;
         stick_state[i] = UNUSED;
+		input_commands[i] = DEFAULT;
+		
         result = pthread_cond_init(&cond[i], NULL);
         
         if(result != 0) {
@@ -165,7 +180,7 @@ void init(){
             exit(EXIT_FAILURE);
         }
         
-        sem_init(&semaphoren[i], 0, 0);
+        sem_init(&semaphores[i], 0, 0);
     }
     pthread_mutex_init(&mutex, NULL);
     
