@@ -11,10 +11,10 @@
 #define EAT_LOOP 500000000
 
 // macros for calculating the left/right stick/philospher
-#define L_STICK(p_id) p_id
+#define L_STICK(p_id) (p_id)
 #define R_STICK(p_id) ((p_id+1)%NPHILO)
-#define PHILO_RECHTS(p_id) ((p_id == NPHILO-1)? 0 : p_id+1)
-#define PHILO_LINKS(p_id) ((p_id == 0)? NPHILO-1 : p_id-1)
+#define L_PHIL(p_id) ((p_id+NPHILO-1)%NPHILO)
+#define R_PHIL(p_id) ((p_id+1)%NPHILO)
 
 //Fuer Zahlenvergleich(ASCII 48 entspricht 0)
 #define ASCII_NUM_OFFSET 48

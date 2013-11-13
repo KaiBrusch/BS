@@ -36,8 +36,8 @@ void put_sticks(int philoID)
     stick_state[R_STICK(philoID)] = UNUSED;
 
     //Wecken der Nachbarn
-    pthread_cond_signal(&cond[PHILO_LINKS(philoID)]);
-    pthread_cond_signal(&cond[PHILO_RECHTS(philoID)]);
+    pthread_cond_signal(&cond[L_PHIL(philoID)]);
+    pthread_cond_signal(&cond[R_PHIL(philoID)]);
 
     pthread_mutex_unlock(&mutex);
 }
@@ -63,7 +63,7 @@ void disp_philo_states()
     //Kontrolliert ob benachbarte Philosophen gleichzeitig essen
     for(i = 0; i < NPHILO; i++) {
         if(philo_state[i] == EAT) {
-            if((philo_state[PHILO_LINKS(i)] == EAT || philo_state[PHILO_RECHTS(i)] == EAT)){
+            if((philo_state[L_PHIL(i)] == EAT || philo_state[R_PHIL(i)] == EAT)){
                 printf("Benachbarte Philosophen duerfen nicht zeitgleich essen!\n");
                 break;
             }
