@@ -16,8 +16,11 @@
 #define L_PHIL(p_id) ((p_id+NPHILO-1)%NPHILO)
 #define R_PHIL(p_id) ((p_id+1)%NPHILO)
 
-//    Offset because of the numbers appearing later in the ASCII
+// Offset because of the numbers appearing later in the ASCII
 #define ASCII_NUM_OFFSET 48
+
+// true for while-loops
+#define TRUE 1
 
 // INPUTLIMIT
 #define INPUT_LEN 5
@@ -52,11 +55,8 @@ void handle_quit(char first_char);
 void handle_command(char cmd_char, int p_id);
 
 // TODO:
-// * check against Styleguide
+// DONE check against Styleguide
 // * test against all fallacy cases
 // * add the special compiler flag for the (int)i into the Makefile
-// * self made print method with fflush()
-// * in getsticks(): why a while-statement. why not an if?
-//         -> because: given a philosopher entering the while and wating for the left_stick to be availible,
-//                the moment it gets free and the thread gets a signal, the while loop ensures a recheck of
-//                the right stick for it to be free as well.
+// * remove p_thread philo_threads[] because of less/irregular useage
+// * why is "sem_inits(....)" last argument zero in our code. but in fohls example it's 1

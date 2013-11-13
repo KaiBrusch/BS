@@ -61,33 +61,34 @@ void disp_philo_states() {
     // Check for inconsistencies
     for(int i = 0; i < NPHILO; i++) {
         if(philo_state[i] == EAT) {
-            if((philo_state[L_PHIL(i)] == EAT || philo_state[R_PHIL(i)] == EAT)){
+            if((philo_state[L_PHIL(i)] == EAT
+                || philo_state[R_PHIL(i)] == EAT)){
                 printf("Two adjacent philosophers must NOT eat simultaneously!\n");
                 break;
             }
         }
     }
     
-	// out each philosopher
+    // out each philosopher
     for(int i = 0; i < NPHILO; i++) {
          switch (philo_state[i]) {
             case EAT:
-				printf("%d%c ", i, 'E');
+                printf("%d%c ", i, 'E');
                 break;
                 
             case THINK:
-				printf("%d%c ", i, 'T');
+                printf("%d%c ", i, 'T');
                 break;
                 
             case HUNGRY:
-				printf("%d%c ", i, 'H');
+                printf("%d%c ", i, 'H');
                 break;
                 
             default:
-				printf("%d%c ", i, '?');	// catch error state
+                printf("%d%c ", i, '?');    // catch error state
                 break;
         }
     }
-	// formatting
+    // formatting
     printf("\n");
 }
