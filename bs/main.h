@@ -16,17 +16,18 @@
 #define L_PHIL(p_id) ((p_id+NPHILO-1)%NPHILO)
 #define R_PHIL(p_id) ((p_id+1)%NPHILO)
 
-//Fuer Zahlenvergleich(ASCII 48 entspricht 0)
+//	Offset because of the numbers appearing later in the ASCII
 #define ASCII_NUM_OFFSET 48
-//Erlaubte Laenge der Eingabe
+
+// INPUTLIMIT
 #define INPUT_LEN 5
 
-//Datentyp fuer die moeglichen Zustaende eines Philosophen
+// Phjilosoper States
 #define THINK 0
 #define HUNGRY 1
 #define EAT 2
 
-//Datentyp fuer die moeglichen Zustaende eines Sticks
+// Stick states
 #define UNUSED 0
 #define USED 1
 
@@ -37,15 +38,16 @@
 #define QUIT 'q'
 #define UNBLOCK 'u'
 
-void *philo(void *arg);
-void think(int p_id);
+// methods of main
+void init();
+void inputLoop();
 void eat(int p_id);
+void think(int p_id);
+void *philo(void *arg);
+void disp_philo_states();
 void get_sticks(int p_id);
 void put_sticks(int p_id);
 void block_philo(int p_id);
-void disp_philo_states();
-void init();
-void inputLoop();
 void handle_quit(char first_char);
 void handle_command(char cmd_char, int p_id);
 
@@ -53,3 +55,4 @@ void handle_command(char cmd_char, int p_id);
 // * check against Styleguide
 // * test against all fallacy cases
 // * add the special compiler flag for the (int)i into the Makefile
+// * self made print method with fflush()

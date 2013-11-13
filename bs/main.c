@@ -17,61 +17,60 @@ char input_commands[NPHILO];
 pthread_t philo_threads[NPHILO];
 char *ph_name[NPHILO] = {"Goedel", "Aristoteles", "Tolstoy", "Mochizuki", "Plato"};
 
-int main(void)
-{
+int main(void) {
     init();
     inputLoop();
     exit(EXIT_SUCCESS);
 }
 
 void inputLoop(){
-    
+
     char input[INPUT_LEN];
-    int running = 1;
     
-    while(running){
+    while(TRUE){
         
-        fgets(input, INPUT_LEN, stdin); // Eingabe lesen und nochmal anzeigen
+		// read input and show it before processing
+        fgets(input, INPUT_LEN, stdin);
         printf("Read from Keyboard: %s\n", input);
         
-        // philosophenID, falls eine angegeben wurde in p_id speichern
-        // wir muessen um den ACSII ziffernoffset verschieben da wir vom string convertieren
+        // calculate the p_id
         int p_id = ((int) input[0]) - ASCII_NUM_OFFSET;
         
-        handle_quit(input[0]);
+        handle_quit(input[0]);	// this will be executed if a 'q' or 'Q' was the first letter
         
-        handle_command(input[1], p_id);
+        handle_command(input[1], p_id);	// this will be executed if it was a command
         
     }
     
 }
 
 void handle_quit(char first_char){
-    // FAll: quit
     if(first_char == 'q' || first_char == 'Q') {
-        
+		
         printf("Quitting...\n");
-        
+		
+		// send quit commands and release all from any semaphore blocks
         for(int i = 0; i < NPHILO; i++) {
-            input_commands[i] = 'q';
+            input_commands[i] = QUIT;
             sem_post(&semaphores[i]);
         }
+		// join all threads
         for(int i = 0; i < NPHILO; i++) {
             pthread_cond_signal(&cond[i]);
             pthread_join(philo_threads[i], NULL);
             printf("%s (%d) is waiting to join...\n", ph_name[i], i);
         }
         
-        //Entfernen der Synchronisationsobjekte
+        // destroy sycn objects(semaphores and condition variables) and mutex
         for(int i = 0; i < NPHILO; i++) {
             pthread_cond_destroy(&cond[i]);
             sem_destroy(&semaphores[i]);
             printf("%s (%d) was killed.\n", ph_name[i], i);
         }
         pthread_mutex_destroy(&mutex);
+		
         printf("Ohh nooes! ALL dead.\n");
         printf("Exit!\n");
-        fflush(stdout);
         
         exit(EXIT_SUCCESS);
     }
@@ -81,7 +80,7 @@ void handle_command(char cmd_char, int p_id){
     
     // only if the id is valid
     if(p_id >= NPHILO){
-        printf("invalid philosopher-ID\n");
+        printf("Invalid philosopher-ID: %d\n", p_id);
     } else {
         switch (cmd_char) {
             case BLOCK:
@@ -100,27 +99,28 @@ void handle_command(char cmd_char, int p_id){
                 break;
                 
             default:
-                printf("Incorrect command.\n");
+                printf("Incorrect command: %s\n", cmd_char);
                 break;
         }
     }
 }
 
-//Beinhaltet das Verhalten von Philosophen.
-void *philo(void *p_id)
-{
-    int philo = (int) p_id;
+// philosopher-thread
+void *philo(void *p_id) {
+    int pid = (int) p_id;
 
-    printf("%s (%d) is ready to Think!\n", ph_name[philo], philo);
+    printf("%s (%d) is ready to Think!\n", ph_name[pid], pid);
 
     while(TRUE) {
+        think(pid);
+		
+        get_sticks(pid);
+		
+        eat(pid);
+		
+        put_sticks(pid);
         
-        think(philo);
-        get_sticks(philo);
-        eat(philo);
-        put_sticks(philo);
-        
-        if(input_commands[philo] == QUIT) {
+        if(input_commands[pid] == QUIT) {
             pthread_exit(NULL);
         }
     }
@@ -130,31 +130,29 @@ void *philo(void *p_id)
 
 
 // Check if the philo is to be blocked and block it. (is called by the corresponding thread)
-void block_philo(int philoID){
-    if(input_commands[philoID] == BLOCK) {
-        sem_wait(&semaphores[philoID]);
+void block_philo(int p_id){
+    if(input_commands[p_id] == BLOCK) {
+        sem_wait(&semaphores[p_id]);
     }
 }
 
 // THINK is a idleloop. If a BLOCK or PROCEED commad has come, it'll block itself or quit the loop.
-void think(int philoID){
-    int i;
-    for(i = 0; i < THINK_LOOP; i++) {
-        block_philo(philoID);
-        if(input_commands[philoID] == PROCEED) {
-            input_commands[philoID] = DEFAULT;
+void think(int p_id){
+    for(int i = 0; i < THINK_LOOP; i++) {
+        block_philo(p_id);
+        if(input_commands[p_id] == PROCEED) {
+            input_commands[p_id] = DEFAULT;
             break;
         }
     }
 }
 
 // EAT idleloop. Mostly equal to as think(...).
-void eat(int philoID) {
-    int i;
-    for(i = 0; i < EAT_LOOP; i++) {
-        block_philo(philoID);
-        if(input_commands[philoID] == PROCEED) {
-            input_commands[philoID] = DEFAULT;
+void eat(int p_id) {
+    for(int i = 0; i < EAT_LOOP; i++) {
+        block_philo(p_id);
+        if(input_commands[p_id] == PROCEED) {
+            input_commands[p_id] = DEFAULT;
             break;
         }
     }
@@ -167,7 +165,7 @@ void init(){
     
     int result;
     
-	// initialize for pthread_cond... set default values and initializse semaphores
+	// initialize for pthread_cond... set default values and initialize semaphores
     for(int i = 0; i < NPHILO; i++) {
         philo_state[i] = THINK;
         stick_state[i] = UNUSED;
@@ -182,6 +180,8 @@ void init(){
         
         sem_init(&semaphores[i], 0, 0);
     }
+	
+	// init mutual exclusion
     pthread_mutex_init(&mutex, NULL);
     
     //Create Threads
