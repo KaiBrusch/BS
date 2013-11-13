@@ -146,6 +146,7 @@ void *philo(void *p_id) {
         put_sticks(pid);
         
         if(input_commands[pid] == QUIT) {
+			input_commands[p_id] = DEFAULT
             pthread_exit(NULL);
         }
     }
@@ -157,6 +158,7 @@ void *philo(void *p_id) {
 // Check if the philo is to be blocked and block it
 void block_philo(int p_id){
     if(input_commands[p_id] == BLOCK) {
+		input_commands[p_id] = DEFAULT
         sem_wait(&semaphores[p_id]);
     }
 }
