@@ -56,3 +56,7 @@ void handle_command(char cmd_char, int p_id);
 // * test against all fallacy cases
 // * add the special compiler flag for the (int)i into the Makefile
 // * self made print method with fflush()
+// * in getsticks(): why a while-statement. why not an if?
+// 		-> because: given a philosopher entering the while and wating for the left_stick to be availible,
+// 			the moment it gets free and the thread gets a signal, the while loop ensures a recheck of
+//			the right stick for it to be free as well.
