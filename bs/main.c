@@ -29,16 +29,16 @@ void inputLoop(){
     
     while(TRUE){
         
-		// read input and show it before processing
+        // read input and show it before processing
         fgets(input, INPUT_LEN, stdin);
         printf("Read from Keyboard: %s\n", input);
         
         // calculate the p_id
         int p_id = ((int) input[0]) - ASCII_NUM_OFFSET;
         
-        handle_quit(input[0]);	// this will be executed if a 'q' or 'Q' was the first letter
+        handle_quit(input[0]);    // this will be executed if a 'q' or 'Q' was the first letter
         
-        handle_command(input[1], p_id);	// this will be executed if it was a command
+        handle_command(input[1], p_id);    // this will be executed if it was a command
         
     }
     
@@ -46,15 +46,15 @@ void inputLoop(){
 
 void handle_quit(char first_char){
     if(first_char == 'q' || first_char == 'Q') {
-		
+        
         printf("Quitting...\n");
-		
-		// send quit commands and release all from any semaphore blocks
+        
+        // send quit commands and release all from any semaphore blocks
         for(int i = 0; i < NPHILO; i++) {
             input_commands[i] = QUIT;
             sem_post(&semaphores[i]);
         }
-		// join all threads
+        // join all threads
         for(int i = 0; i < NPHILO; i++) {
             pthread_cond_signal(&cond[i]);
             pthread_join(philo_threads[i], NULL);
@@ -68,7 +68,7 @@ void handle_quit(char first_char){
             printf("%s (%d) was killed.\n", ph_name[i], i);
         }
         pthread_mutex_destroy(&mutex);
-		
+        
         printf("Ohh nooes! ALL dead.\n");
         printf("Exit!\n");
         
@@ -113,11 +113,11 @@ void *philo(void *p_id) {
 
     while(TRUE) {
         think(pid);
-		
+        
         get_sticks(pid);
-		
+        
         eat(pid);
-		
+        
         put_sticks(pid);
         
         if(input_commands[pid] == QUIT) {
@@ -165,12 +165,12 @@ void init(){
     
     int result;
     
-	// initialize for pthread_cond... set default values and initialize semaphores
+    // initialize for pthread_cond... set default values and initialize semaphores
     for(int i = 0; i < NPHILO; i++) {
         philo_state[i] = THINK;
         stick_state[i] = UNUSED;
-		input_commands[i] = DEFAULT;
-		
+        input_commands[i] = DEFAULT;
+        
         result = pthread_cond_init(&cond[i], NULL);
         
         if(result != 0) {
@@ -180,8 +180,8 @@ void init(){
         
         sem_init(&semaphores[i], 0, 0);
     }
-	
-	// init mutual exclusion
+    
+    // init mutual exclusion
     pthread_mutex_init(&mutex, NULL);
     
     //Create Threads
