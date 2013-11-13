@@ -60,3 +60,4 @@ void handle_command(char cmd_char, int p_id);
 // * add the special compiler flag for the (int)i into the Makefile
 // * remove p_thread philo_threads[] because of less/irregular useage
 // * why is "sem_inits(....)" last argument zero in our code. but in fohls example it's 1
+// * PROTOKOLL as PDF for Fohl!
