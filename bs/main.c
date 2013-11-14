@@ -16,13 +16,13 @@ char input_commands[NPHILO];
 pthread_t philo_threads[NPHILO];
 
 // how about names?
-char *ph_name[NPHILO] = {
-    "Goedel",
-    "Aristoteles",
-    "Tolstoy",
-    "Mochizuki",
-    "Plato"
-};
+char *ph_name[NPHILO];
+ph_name[0] = "Goedel";
+ph_name[1] = "Aristoteles";
+ph_name[2] = "Tolstoy";
+ph_name[3] = "Mochizuki";
+ph_name[4] = "Plato";
+// first 5 names are given. All others are empty by default.
 
 int main(void) {
     init();
@@ -198,7 +198,10 @@ void init(){
         philo_state[i] = THINK;
         stick_state[i] = UNUSED;
         input_commands[i] = DEFAULT;
-        
+		if( i >= GIVEN_NAMES ){
+			ph_name[i] = "Philosopher";
+        }
+		
         result = pthread_cond_init(&cond[i], NULL);
         
         if(result != 0) {

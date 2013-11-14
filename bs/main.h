@@ -41,6 +41,10 @@
 #define QUIT 'q'
 #define UNBLOCK 'u'
 
+// only 5 names are given at the beginning.
+// this #define is needed to set the default names for the remaining philosophers
+#define GIVEN_NAMES 5
+
 // methods of main
 void init();
 void inputLoop();
@@ -61,3 +65,5 @@ void handle_command(char cmd_char, int p_id);
 // * remove p_thread philo_threads[] because of less/irregular useage
 // * why is "sem_inits(....)" last argument zero in our code. but in fohls example it's 1
 // * PROTOKOLL as PDF for Fohl!
+// * make generic names for the case NPHILO > 5. (Like the default name then becomes)
+// * do my changes still run the program?
