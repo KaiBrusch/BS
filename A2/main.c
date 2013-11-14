@@ -14,6 +14,7 @@ sem_t semaphores[NPHILO];
 // commands for communication
 char input_commands[NPHILO];
 pthread_t philo_threads[NPHILO];
+int p_ids[NPHILO];
 
 // how about names?
 char *ph_name[NPHILO] = {
@@ -35,8 +36,8 @@ int main(void) {
 void inputLoop(){
 
     char input[INPUT_LEN];
-    char first_char_idx = 0;
-    char second_char_idx = 1;
+    int first_char_idx = 0;
+    int second_char_idx = 1;
     
     while(TRUE){
         
@@ -126,7 +127,7 @@ void handle_command(char cmd_char, int p_id){
                 break;
                 
             default:
-                printf("Incorrect command: %s\n", cmd_char);
+                printf("Incorrect command: %c\n", cmd_char);
                 break;
         }
     }
@@ -134,7 +135,7 @@ void handle_command(char cmd_char, int p_id){
 
 // philosopher-thread
 void *philo(void *p_id) {
-    int pid = (int) p_id;
+    int pid = *((int *)p_id);
 
     printf("%s (%d) is ready to Think!\n", ph_name[pid], pid);
 
@@ -197,11 +198,12 @@ void init(){
     
     // initialize for pthread_cond... set default values and initialize semaphores
     for(int i = 0; i < NPHILO; i++) {
+        p_ids[i] = i;
         philo_state[i] = THINK;
         stick_state[i] = UNUSED;
         input_commands[i] = DEFAULT;
-		if( i >= GIVEN_NAMES ){
-			ph_name[i] = "Philosopher";
+	if( i >= GIVEN_NAMES ){
+		ph_name[i] = "Philosopher";
         }
 		
         result = pthread_cond_init(&cond[i], NULL);
@@ -227,7 +229,7 @@ void init(){
     
     //Create Threads
     for(int p_id = 0; p_id < NPHILO; p_id++) {
-        result = pthread_create(&philo_threads[p_id], NULL, philo, (void *) p_id);
+        result = pthread_create(&philo_threads[p_id], NULL, philo, (void *) &(p_ids[p_id]));
         if(result != 0) {
             perror("Thread creation failed!\n");
             exit(EXIT_FAILURE);

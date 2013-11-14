@@ -1,4 +1,3 @@
-
 CC := /usr/bin/gcc
 CCFLAGS := -pthread -g -lpthread -Wall -std=c99
 LDFLAGS := -pthread
