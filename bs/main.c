@@ -16,12 +16,14 @@ char input_commands[NPHILO];
 pthread_t philo_threads[NPHILO];
 
 // how about names?
-char *ph_name[NPHILO];
-ph_name[0] = "Goedel";
-ph_name[1] = "Aristoteles";
-ph_name[2] = "Tolstoy";
-ph_name[3] = "Mochizuki";
-ph_name[4] = "Plato";
+char *ph_name[NPHILO] = {
+    "Goedel",
+    "Aristoteles",
+    "Tolstoy",
+    "Mochizuki", 
+    "Plato"
+};
+
 // first 5 names are given. All others are empty by default.
 
 int main(void) {
@@ -72,7 +74,7 @@ void handle_quit(char first_char){
             pthread_cond_signal(&cond[i]);
             result = pthread_join(philo_threads[i], NULL);
             if(result != 0){
-               perror("Thread(%d) join failed\n", i);
+               perror("Thread join failed\n");
                exit(EXIT_FAILURE);
             }
             printf("%s (%d) is waiting to join...\n", ph_name[i], i);
@@ -82,7 +84,7 @@ void handle_quit(char first_char){
         for(int i = 0; i < NPHILO; i++) {
             result = pthread_cond_destroy(&cond[i]);
             if(result != 0){
-               perror("cond_var(%d) destruction failed!\n", i);
+               perror("cond_var destruction failed!\n");
                exit(EXIT_FAILURE);
             }
             sem_destroy(&semaphores[i]);
@@ -146,7 +148,7 @@ void *philo(void *p_id) {
         put_sticks(pid);
         
         if(input_commands[pid] == QUIT) {
-            input_commands[p_id] = DEFAULT;
+            input_commands[pid] = DEFAULT;
             pthread_exit(NULL);
         }
     }
@@ -233,3 +235,4 @@ void init(){
     }
     
 }
+
