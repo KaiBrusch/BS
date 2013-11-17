@@ -144,13 +144,3 @@ void handle_quit(char first_char);
  *  @return void
  */
 void handle_command(char cmd_char, int p_id);
-
-// TODO:
-// DONE check against Styleguide
-// * test against all fallacy cases
-// * add the special compiler flag for the (int)i into the Makefile
-// * remove p_thread philo_threads[] because of less/irregular useage
-// * why is "sem_inits(....)" last argument zero in our code. but in fohls example it's 1
-// * PROTOKOLL as PDF for Fohl!
-// * make generic names for the case NPHILO > 5. (Like the default name then becomes)
-// * do my changes still run the program?
