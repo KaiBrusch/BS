@@ -1,0 +1,315 @@
+\hypertarget{main_8h}{\section{main.\-h File Reference}
+\label{main_8h}\index{main.\-h@{main.\-h}}
+}
+
+
+This file contains all constants and method signatures.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$pthread.\-h$>$}\\*
+{\ttfamily \#include $<$semaphore.\-h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{main_8h_a9e69c89d0fa10417c4b8434ef932991a}{\#define {\bfseries N\-P\-H\-I\-L\-O}~5}\label{main_8h_a9e69c89d0fa10417c4b8434ef932991a}
+
+\item 
+\hypertarget{main_8h_a3da1250ecf3fffcbfd724070e4443f31}{\#define {\bfseries T\-H\-I\-N\-K\-\_\-\-L\-O\-O\-P}~100000000}\label{main_8h_a3da1250ecf3fffcbfd724070e4443f31}
+
+\item 
+\hypertarget{main_8h_a254512d0c4d5b45e9d3649168de6a598}{\#define {\bfseries E\-A\-T\-\_\-\-L\-O\-O\-P}~500000000}\label{main_8h_a254512d0c4d5b45e9d3649168de6a598}
+
+\item 
+\hypertarget{main_8h_afdc14f7ef898511b51a737f89270fa70}{\#define {\bfseries L\-\_\-\-S\-T\-I\-C\-K}(p\-\_\-id)~(p\-\_\-id)}\label{main_8h_afdc14f7ef898511b51a737f89270fa70}
+
+\item 
+\hypertarget{main_8h_a3f4ad8a9d40d5013a1f8cb99b7c2fe3d}{\#define {\bfseries R\-\_\-\-S\-T\-I\-C\-K}(p\-\_\-id)~((p\-\_\-id+1)\%N\-P\-H\-I\-L\-O)}\label{main_8h_a3f4ad8a9d40d5013a1f8cb99b7c2fe3d}
+
+\item 
+\hypertarget{main_8h_af81fe76d3e33739df162f204221826dc}{\#define {\bfseries L\-\_\-\-P\-H\-I\-L}(p\-\_\-id)~((p\-\_\-id+N\-P\-H\-I\-L\-O-\/1)\%N\-P\-H\-I\-L\-O)}\label{main_8h_af81fe76d3e33739df162f204221826dc}
+
+\item 
+\hypertarget{main_8h_a471b0d33452233eadcfd35be598356da}{\#define {\bfseries R\-\_\-\-P\-H\-I\-L}(p\-\_\-id)~((p\-\_\-id+1)\%N\-P\-H\-I\-L\-O)}\label{main_8h_a471b0d33452233eadcfd35be598356da}
+
+\item 
+\hypertarget{main_8h_aafe14d6e6e8fcef6714002b4380870b7}{\#define {\bfseries A\-S\-C\-I\-I\-\_\-\-N\-U\-M\-\_\-\-O\-F\-F\-S\-E\-T}~48}\label{main_8h_aafe14d6e6e8fcef6714002b4380870b7}
+
+\item 
+\hypertarget{main_8h_aa8cecfc5c5c054d2875c03e77b7be15d}{\#define {\bfseries T\-R\-U\-E}~1}\label{main_8h_aa8cecfc5c5c054d2875c03e77b7be15d}
+
+\item 
+\hypertarget{main_8h_a6c6382ce2733beda3139ed0a2b84fc69}{\#define {\bfseries I\-N\-P\-U\-T\-\_\-\-L\-E\-N}~5}\label{main_8h_a6c6382ce2733beda3139ed0a2b84fc69}
+
+\item 
+\hypertarget{main_8h_ab3fd8705bf275fd3f080dc354056ff3b}{\#define {\bfseries T\-H\-I\-N\-K}~0}\label{main_8h_ab3fd8705bf275fd3f080dc354056ff3b}
+
+\item 
+\hypertarget{main_8h_a7b98f8e1ebd9fad556acbf6e335883d9}{\#define {\bfseries H\-U\-N\-G\-R\-Y}~1}\label{main_8h_a7b98f8e1ebd9fad556acbf6e335883d9}
+
+\item 
+\hypertarget{main_8h_a168db05df29f4ea8393be04e6168e236}{\#define {\bfseries E\-A\-T}~2}\label{main_8h_a168db05df29f4ea8393be04e6168e236}
+
+\item 
+\hypertarget{main_8h_addf5ec070e9499d36b7f2009ce736076}{\#define {\bfseries U\-N\-U\-S\-E\-D}~0}\label{main_8h_addf5ec070e9499d36b7f2009ce736076}
+
+\item 
+\hypertarget{main_8h_abcd0a22ee4346cad5706adb6d2119429}{\#define {\bfseries U\-S\-E\-D}~1}\label{main_8h_abcd0a22ee4346cad5706adb6d2119429}
+
+\item 
+\hypertarget{main_8h_a3da44afeba217135a680a7477b5e3ce3}{\#define {\bfseries D\-E\-F\-A\-U\-L\-T}~'d'}\label{main_8h_a3da44afeba217135a680a7477b5e3ce3}
+
+\item 
+\hypertarget{main_8h_a52220397ecea855b3a99746e451426e1}{\#define {\bfseries B\-L\-O\-C\-K}~'b'}\label{main_8h_a52220397ecea855b3a99746e451426e1}
+
+\item 
+\hypertarget{main_8h_a933db57bcb6f9415e7bf41fad62fde8c}{\#define {\bfseries P\-R\-O\-C\-E\-E\-D}~'p'}\label{main_8h_a933db57bcb6f9415e7bf41fad62fde8c}
+
+\item 
+\hypertarget{main_8h_ad24e2b54375e12474e65ebf7175988fb}{\#define {\bfseries Q\-U\-I\-T}~'q'}\label{main_8h_ad24e2b54375e12474e65ebf7175988fb}
+
+\item 
+\hypertarget{main_8h_a12c2b691309530ae724695550fca1969}{\#define {\bfseries U\-N\-B\-L\-O\-C\-K}~'u'}\label{main_8h_a12c2b691309530ae724695550fca1969}
+
+\item 
+\hypertarget{main_8h_a1b914f784d3f8bfd648e290a14ab5426}{\#define {\bfseries G\-I\-V\-E\-N\-\_\-\-N\-A\-M\-E\-S}~5}\label{main_8h_a1b914f784d3f8bfd648e290a14ab5426}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{main_8h_a02fd73d861ef2e4aabb38c0c9ff82947}{init} ()
+\begin{DoxyCompactList}\small\item\em Initialize all philosophers states and create the pthreads. \end{DoxyCompactList}\item 
+void \hyperlink{main_8h_a265489102d37b42cd38c815230e3a3ae}{input\-Loop} ()
+\begin{DoxyCompactList}\small\item\em a continuous loop that listens on user input. \end{DoxyCompactList}\item 
+void \hyperlink{main_8h_a0c8c51d90769a1116cdadde466de49fd}{eat} (int p\-\_\-id)
+\begin{DoxyCompactList}\small\item\em a for loop that runs E\-A\-T\-\_\-\-L\-O\-O\-P times to simulate a waiting time. The Function is also used to block the philosophers for this type of action. \end{DoxyCompactList}\item 
+void \hyperlink{main_8h_af9aa51f8b26299354cf18d7c43276fdb}{think} (int p\-\_\-id)
+\begin{DoxyCompactList}\small\item\em a for loop that runs T\-H\-I\-N\-K\-\_\-\-L\-O\-O\-P times to simulate a waiting time. The Function is also used to block the philosophers for this type of action. \end{DoxyCompactList}\item 
+void $\ast$ \hyperlink{main_8h_ad5859b15faf1b8d7da3ba92f25414693}{philo} (void $\ast$arg)
+\begin{DoxyCompactList}\small\item\em is the philosopher thread where a philosopher calls \char`\"{}think\char`\"{}, \char`\"{}get\-\_\-sticks\char`\"{}, \char`\"{}eat\char`\"{} and \char`\"{}put\-\_\-sticks\char`\"{}. A philosopher thread runs until it is destroyed by the user through an input in the inputloop starting with \char`\"{}q$|$\-Q\char`\"{}. \end{DoxyCompactList}\item 
+void \hyperlink{main_8h_aea8ce703c461f82960cffd6ec5342c83}{disp\-\_\-philo\-\_\-states} ()
+\begin{DoxyCompactList}\small\item\em prints out the current state of each philosopher in a row based view within the shell/\-I\-D\-E. The view works like this\-: p\-\_\-id\-\_\-0 + p\-\_\-state\-\_\-0 + \char`\"{} \char`\"{} .. p\-\_\-id\-\_\-\-N\-P\-H\-I\-L\-O + p\-\_\-state\-\_\-\-N\-P\-H\-I\-L\-O + \char`\"{} \char`\"{} \end{DoxyCompactList}\item 
+void \hyperlink{main_8h_ac03bf5af46f8e27151c8486596699c24}{get\-\_\-sticks} (int p\-\_\-id)
+\begin{DoxyCompactList}\small\item\em gets the left and right sticks next to this particular philosopher (p\-\_\-id). To do so the pthread\-\_\-mutex is locked at the beginning and then unlocked at the end. This is to make sure that the sticks won't be used by other philosophers. The state of the Philosopher is then changed. The Philosopher then waits for his left and right stick to be freed so the philosopher can be set to the State E\-A\-T. \end{DoxyCompactList}\item 
+void \hyperlink{main_8h_a8b3813606a8d65f6dd71626170f71276}{put\-\_\-sticks} (int p\-\_\-id)
+\begin{DoxyCompactList}\small\item\em put\-\_\-sticks is called after get\-\_\-sticks to set the left and right stick of the current Philosoph to U\-N\-U\-S\-E\-D. This is to ensure that the sticks can be used by other philosophers. The Philosopher is set to the state T\-H\-I\-N\-K again. \end{DoxyCompactList}\item 
+void \hyperlink{main_8h_a0bd371de921e344c78939e8520580005}{block\-\_\-philo} (int p\-\_\-id)
+\begin{DoxyCompactList}\small\item\em block\-\_\-philo takes the p\-\_\-id of the Philosopher and asks if its state is B\-L\-O\-C\-K\-E\-D. If so set the state to default and call sem\-\_\-wait to block him else do nothing. \end{DoxyCompactList}\item 
+void \hyperlink{main_8h_a3bb3a041151f4e245ca4151fdb60aa94}{handle\-\_\-quit} (char first\-\_\-char)
+\begin{DoxyCompactList}\small\item\em handle\-\_\-quit take the first character of the input and checks if it is a q or Q. If so release all Philosophers from their semaphore blocks which were set through sem\-\_\-wait. After that join all philosopher so that each philo waits for the others. If they were joined the semaphores are destroyed and the pthread\-\_\-mutex are destroyed. The philosophers within their function get a callback thorugh the input\-\_\-command by the user and calls pthread\-\_\-exit to kill this thread. \end{DoxyCompactList}\item 
+void \hyperlink{main_8h_a47d8d817895b8bb8183afd542fcbf012}{handle\-\_\-command} (char cmd\-\_\-char, int p\-\_\-id)
+\begin{DoxyCompactList}\small\item\em the handle\-\_\-command handles the userinput. the cmd\-\_\-char is at input\mbox{[}1\mbox{]} and is a char that must be equal to 'b' for B\-L\-O\-C\-K, 'u' for U\-N\-B\-L\-O\-C\-K, 'p' for P\-R\-O\-C\-E\-E\-D, else a default is called. The second argument is the philosopher id that is taken from input\mbox{[}0\mbox{]} and has to be between 0 and N\-P\-H\-I\-L\-O. At maximum 9 Philosophers are allowed. In any case the input\-\_\-commands array is set to a specific state for the Philosopher (p\-\_\-id). \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This file contains all constants and method signatures. \begin{DoxyAuthor}{Author}
+Kai Brusch 
+
+Matthias Nitsche 
+
+Swaneet Kumar 
+
+Ivan Morozov 
+\end{DoxyAuthor}
+
+
+\subsection{Function Documentation}
+\hypertarget{main_8h_a0bd371de921e344c78939e8520580005}{\index{main.\-h@{main.\-h}!block\-\_\-philo@{block\-\_\-philo}}
+\index{block\-\_\-philo@{block\-\_\-philo}!main.h@{main.\-h}}
+\subsubsection[{block\-\_\-philo}]{\setlength{\rightskip}{0pt plus 5cm}void block\-\_\-philo (
+\begin{DoxyParamCaption}
+\item[{int}]{p\-\_\-id}
+\end{DoxyParamCaption}
+)}}\label{main_8h_a0bd371de921e344c78939e8520580005}
+
+
+block\-\_\-philo takes the p\-\_\-id of the Philosopher and asks if its state is B\-L\-O\-C\-K\-E\-D. If so set the state to default and call sem\-\_\-wait to block him else do nothing. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p\-\_\-id} & philosopher id \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{main_8h_aea8ce703c461f82960cffd6ec5342c83}{\index{main.\-h@{main.\-h}!disp\-\_\-philo\-\_\-states@{disp\-\_\-philo\-\_\-states}}
+\index{disp\-\_\-philo\-\_\-states@{disp\-\_\-philo\-\_\-states}!main.h@{main.\-h}}
+\subsubsection[{disp\-\_\-philo\-\_\-states}]{\setlength{\rightskip}{0pt plus 5cm}void disp\-\_\-philo\-\_\-states (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{main_8h_aea8ce703c461f82960cffd6ec5342c83}
+
+
+prints out the current state of each philosopher in a row based view within the shell/\-I\-D\-E. The view works like this\-: p\-\_\-id\-\_\-0 + p\-\_\-state\-\_\-0 + \char`\"{} \char`\"{} .. p\-\_\-id\-\_\-\-N\-P\-H\-I\-L\-O + p\-\_\-state\-\_\-\-N\-P\-H\-I\-L\-O + \char`\"{} \char`\"{} 
+
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{main_8h_a0c8c51d90769a1116cdadde466de49fd}{\index{main.\-h@{main.\-h}!eat@{eat}}
+\index{eat@{eat}!main.h@{main.\-h}}
+\subsubsection[{eat}]{\setlength{\rightskip}{0pt plus 5cm}void eat (
+\begin{DoxyParamCaption}
+\item[{int}]{p\-\_\-id}
+\end{DoxyParamCaption}
+)}}\label{main_8h_a0c8c51d90769a1116cdadde466de49fd}
+
+
+a for loop that runs E\-A\-T\-\_\-\-L\-O\-O\-P times to simulate a waiting time. The Function is also used to block the philosophers for this type of action. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p\-\_\-id} & philosopher id \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{main_8h_ac03bf5af46f8e27151c8486596699c24}{\index{main.\-h@{main.\-h}!get\-\_\-sticks@{get\-\_\-sticks}}
+\index{get\-\_\-sticks@{get\-\_\-sticks}!main.h@{main.\-h}}
+\subsubsection[{get\-\_\-sticks}]{\setlength{\rightskip}{0pt plus 5cm}void get\-\_\-sticks (
+\begin{DoxyParamCaption}
+\item[{int}]{p\-\_\-id}
+\end{DoxyParamCaption}
+)}}\label{main_8h_ac03bf5af46f8e27151c8486596699c24}
+
+
+gets the left and right sticks next to this particular philosopher (p\-\_\-id). To do so the pthread\-\_\-mutex is locked at the beginning and then unlocked at the end. This is to make sure that the sticks won't be used by other philosophers. The state of the Philosopher is then changed. The Philosopher then waits for his left and right stick to be freed so the philosopher can be set to the State E\-A\-T. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p\-\_\-id} & philosopher id \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{main_8h_a47d8d817895b8bb8183afd542fcbf012}{\index{main.\-h@{main.\-h}!handle\-\_\-command@{handle\-\_\-command}}
+\index{handle\-\_\-command@{handle\-\_\-command}!main.h@{main.\-h}}
+\subsubsection[{handle\-\_\-command}]{\setlength{\rightskip}{0pt plus 5cm}void handle\-\_\-command (
+\begin{DoxyParamCaption}
+\item[{char}]{cmd\-\_\-char, }
+\item[{int}]{p\-\_\-id}
+\end{DoxyParamCaption}
+)}}\label{main_8h_a47d8d817895b8bb8183afd542fcbf012}
+
+
+the handle\-\_\-command handles the userinput. the cmd\-\_\-char is at input\mbox{[}1\mbox{]} and is a char that must be equal to 'b' for B\-L\-O\-C\-K, 'u' for U\-N\-B\-L\-O\-C\-K, 'p' for P\-R\-O\-C\-E\-E\-D, else a default is called. The second argument is the philosopher id that is taken from input\mbox{[}0\mbox{]} and has to be between 0 and N\-P\-H\-I\-L\-O. At maximum 9 Philosophers are allowed. In any case the input\-\_\-commands array is set to a specific state for the Philosopher (p\-\_\-id). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em cmd\-\_\-char} & second character of input by user. \\
+\hline
+{\em p\-\_\-id} & philosopher id \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{main_8h_a3bb3a041151f4e245ca4151fdb60aa94}{\index{main.\-h@{main.\-h}!handle\-\_\-quit@{handle\-\_\-quit}}
+\index{handle\-\_\-quit@{handle\-\_\-quit}!main.h@{main.\-h}}
+\subsubsection[{handle\-\_\-quit}]{\setlength{\rightskip}{0pt plus 5cm}void handle\-\_\-quit (
+\begin{DoxyParamCaption}
+\item[{char}]{first\-\_\-char}
+\end{DoxyParamCaption}
+)}}\label{main_8h_a3bb3a041151f4e245ca4151fdb60aa94}
+
+
+handle\-\_\-quit take the first character of the input and checks if it is a q or Q. If so release all Philosophers from their semaphore blocks which were set through sem\-\_\-wait. After that join all philosopher so that each philo waits for the others. If they were joined the semaphores are destroyed and the pthread\-\_\-mutex are destroyed. The philosophers within their function get a callback thorugh the input\-\_\-command by the user and calls pthread\-\_\-exit to kill this thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em first\-\_\-char} & is the first input character of the input by the user. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{main_8h_a02fd73d861ef2e4aabb38c0c9ff82947}{\index{main.\-h@{main.\-h}!init@{init}}
+\index{init@{init}!main.h@{main.\-h}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}void init (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{main_8h_a02fd73d861ef2e4aabb38c0c9ff82947}
+
+
+Initialize all philosophers states and create the pthreads. 
+
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{main_8h_a265489102d37b42cd38c815230e3a3ae}{\index{main.\-h@{main.\-h}!input\-Loop@{input\-Loop}}
+\index{input\-Loop@{input\-Loop}!main.h@{main.\-h}}
+\subsubsection[{input\-Loop}]{\setlength{\rightskip}{0pt plus 5cm}void input\-Loop (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{main_8h_a265489102d37b42cd38c815230e3a3ae}
+
+
+a continuous loop that listens on user input. 
+
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{main_8h_ad5859b15faf1b8d7da3ba92f25414693}{\index{main.\-h@{main.\-h}!philo@{philo}}
+\index{philo@{philo}!main.h@{main.\-h}}
+\subsubsection[{philo}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ philo (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{arg}
+\end{DoxyParamCaption}
+)}}\label{main_8h_ad5859b15faf1b8d7da3ba92f25414693}
+
+
+is the philosopher thread where a philosopher calls \char`\"{}think\char`\"{}, \char`\"{}get\-\_\-sticks\char`\"{}, \char`\"{}eat\char`\"{} and \char`\"{}put\-\_\-sticks\char`\"{}. A philosopher thread runs until it is destroyed by the user through an input in the inputloop starting with \char`\"{}q$|$\-Q\char`\"{}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em $\ast$arg} & a pointer to a arbitrary object (in this case philo id). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{main_8h_a8b3813606a8d65f6dd71626170f71276}{\index{main.\-h@{main.\-h}!put\-\_\-sticks@{put\-\_\-sticks}}
+\index{put\-\_\-sticks@{put\-\_\-sticks}!main.h@{main.\-h}}
+\subsubsection[{put\-\_\-sticks}]{\setlength{\rightskip}{0pt plus 5cm}void put\-\_\-sticks (
+\begin{DoxyParamCaption}
+\item[{int}]{p\-\_\-id}
+\end{DoxyParamCaption}
+)}}\label{main_8h_a8b3813606a8d65f6dd71626170f71276}
+
+
+put\-\_\-sticks is called after get\-\_\-sticks to set the left and right stick of the current Philosoph to U\-N\-U\-S\-E\-D. This is to ensure that the sticks can be used by other philosophers. The Philosopher is set to the state T\-H\-I\-N\-K again. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p\-\_\-id} & philosopher id \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\hypertarget{main_8h_af9aa51f8b26299354cf18d7c43276fdb}{\index{main.\-h@{main.\-h}!think@{think}}
+\index{think@{think}!main.h@{main.\-h}}
+\subsubsection[{think}]{\setlength{\rightskip}{0pt plus 5cm}void think (
+\begin{DoxyParamCaption}
+\item[{int}]{p\-\_\-id}
+\end{DoxyParamCaption}
+)}}\label{main_8h_af9aa51f8b26299354cf18d7c43276fdb}
+
+
+a for loop that runs T\-H\-I\-N\-K\-\_\-\-L\-O\-O\-P times to simulate a waiting time. The Function is also used to block the philosophers for this type of action. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p\-\_\-id} & philosopher id \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
