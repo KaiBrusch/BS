@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.5"/>
-<title>Dining Philosophers: main.h Source File</title>
+<title>My Project: main.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">Dining Philosophers
+   <div id="projectname">My Project
    </div>
   </td>
  </tr>
@@ -153,21 +153,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="keywordtype">void</span> <a class="code" href="main_8h.html#a3bb3a041151f4e245ca4151fdb60aa94">handle_quit</a>(<span class="keywordtype">char</span> first_char);</div>
 <div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;</div>
 <div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;<span class="keywordtype">void</span> <a class="code" href="main_8h.html#a47d8d817895b8bb8183afd542fcbf012">handle_command</a>(<span class="keywordtype">char</span> cmd_char, <span class="keywordtype">int</span> p_id);</div>
-<div class="ttc" id="main_8h_html_a0c8c51d90769a1116cdadde466de49fd"><div class="ttname"><a href="main_8h.html#a0c8c51d90769a1116cdadde466de49fd">eat</a></div><div class="ttdeci">void eat(int p_id)</div><div class="ttdoc">a for loop that runs EAT_LOOP times to simulate a waiting time. The Function is also used to block th...</div><div class="ttdef"><b>Definition:</b> main.c:181</div></div>
-<div class="ttc" id="main_8h_html_a265489102d37b42cd38c815230e3a3ae"><div class="ttname"><a href="main_8h.html#a265489102d37b42cd38c815230e3a3ae">inputLoop</a></div><div class="ttdeci">void inputLoop()</div><div class="ttdoc">a continuous loop that listens on user input. </div><div class="ttdef"><b>Definition:</b> main.c:35</div></div>
-<div class="ttc" id="main_8h_html_ad5859b15faf1b8d7da3ba92f25414693"><div class="ttname"><a href="main_8h.html#ad5859b15faf1b8d7da3ba92f25414693">philo</a></div><div class="ttdeci">void * philo(void *arg)</div><div class="ttdoc">is the philosopher thread where a philosopher calls &amp;quot;think&amp;quot;, &amp;quot;get_sticks&amp;quot;, &amp;quot;eat&amp;quot; and &amp;quot;put_sticks&amp;quot;...</div><div class="ttdef"><b>Definition:</b> main.c:136</div></div>
-<div class="ttc" id="main_8h_html_a02fd73d861ef2e4aabb38c0c9ff82947"><div class="ttname"><a href="main_8h.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a></div><div class="ttdeci">void init()</div><div class="ttdoc">Initialize all philosophers states and create the pthreads. </div><div class="ttdef"><b>Definition:</b> main.c:194</div></div>
-<div class="ttc" id="main_8h_html_af9aa51f8b26299354cf18d7c43276fdb"><div class="ttname"><a href="main_8h.html#af9aa51f8b26299354cf18d7c43276fdb">think</a></div><div class="ttdeci">void think(int p_id)</div><div class="ttdoc">a for loop that runs THINK_LOOP times to simulate a waiting time. The Function is also used to block ...</div><div class="ttdef"><b>Definition:</b> main.c:170</div></div>
-<div class="ttc" id="main_8h_html_a47d8d817895b8bb8183afd542fcbf012"><div class="ttname"><a href="main_8h.html#a47d8d817895b8bb8183afd542fcbf012">handle_command</a></div><div class="ttdeci">void handle_command(char cmd_char, int p_id)</div><div class="ttdoc">the handle_command handles the userinput. the cmd_char is at input[1] and is a char that must be equa...</div><div class="ttdef"><b>Definition:</b> main.c:106</div></div>
-<div class="ttc" id="main_8h_html_a0bd371de921e344c78939e8520580005"><div class="ttname"><a href="main_8h.html#a0bd371de921e344c78939e8520580005">block_philo</a></div><div class="ttdeci">void block_philo(int p_id)</div><div class="ttdoc">block_philo takes the p_id of the Philosopher and asks if its state is BLOCKED. If so set the state t...</div><div class="ttdef"><b>Definition:</b> main.c:161</div></div>
+<div class="ttc" id="main_8h_html_a0c8c51d90769a1116cdadde466de49fd"><div class="ttname"><a href="main_8h.html#a0c8c51d90769a1116cdadde466de49fd">eat</a></div><div class="ttdeci">void eat(int p_id)</div><div class="ttdoc">a for loop that runs EAT_LOOP times to simulate a waiting time. The Function is also used to block th...</div><div class="ttdef"><b>Definition:</b> main.c:182</div></div>
+<div class="ttc" id="main_8h_html_a265489102d37b42cd38c815230e3a3ae"><div class="ttname"><a href="main_8h.html#a265489102d37b42cd38c815230e3a3ae">inputLoop</a></div><div class="ttdeci">void inputLoop()</div><div class="ttdoc">a continuous loop that listens on user input. </div><div class="ttdef"><b>Definition:</b> main.c:36</div></div>
+<div class="ttc" id="main_8h_html_ad5859b15faf1b8d7da3ba92f25414693"><div class="ttname"><a href="main_8h.html#ad5859b15faf1b8d7da3ba92f25414693">philo</a></div><div class="ttdeci">void * philo(void *arg)</div><div class="ttdoc">is the philosopher thread where a philosopher calls &amp;quot;think&amp;quot;, &amp;quot;get_sticks&amp;quot;, &amp;quot;eat&amp;quot; and &amp;quot;put_sticks&amp;quot;...</div><div class="ttdef"><b>Definition:</b> main.c:137</div></div>
+<div class="ttc" id="main_8h_html_a02fd73d861ef2e4aabb38c0c9ff82947"><div class="ttname"><a href="main_8h.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a></div><div class="ttdeci">void init()</div><div class="ttdoc">Initialize all philosophers states and create the pthreads. </div><div class="ttdef"><b>Definition:</b> main.c:195</div></div>
+<div class="ttc" id="main_8h_html_af9aa51f8b26299354cf18d7c43276fdb"><div class="ttname"><a href="main_8h.html#af9aa51f8b26299354cf18d7c43276fdb">think</a></div><div class="ttdeci">void think(int p_id)</div><div class="ttdoc">a for loop that runs THINK_LOOP times to simulate a waiting time. The Function is also used to block ...</div><div class="ttdef"><b>Definition:</b> main.c:171</div></div>
+<div class="ttc" id="main_8h_html_a47d8d817895b8bb8183afd542fcbf012"><div class="ttname"><a href="main_8h.html#a47d8d817895b8bb8183afd542fcbf012">handle_command</a></div><div class="ttdeci">void handle_command(char cmd_char, int p_id)</div><div class="ttdoc">the handle_command handles the userinput. the cmd_char is at input[1] and is a char that must be equa...</div><div class="ttdef"><b>Definition:</b> main.c:107</div></div>
+<div class="ttc" id="main_8h_html_a0bd371de921e344c78939e8520580005"><div class="ttname"><a href="main_8h.html#a0bd371de921e344c78939e8520580005">block_philo</a></div><div class="ttdeci">void block_philo(int p_id)</div><div class="ttdoc">block_philo takes the p_id of the Philosopher and asks if its state is BLOCKED. If so set the state t...</div><div class="ttdef"><b>Definition:</b> main.c:162</div></div>
 <div class="ttc" id="main_8h_html_a8b3813606a8d65f6dd71626170f71276"><div class="ttname"><a href="main_8h.html#a8b3813606a8d65f6dd71626170f71276">put_sticks</a></div><div class="ttdeci">void put_sticks(int p_id)</div><div class="ttdoc">put_sticks is called after get_sticks to set the left and right stick of the current Philosoph to UNU...</div><div class="ttdef"><b>Definition:</b> monitor.c:37</div></div>
 <div class="ttc" id="main_8h_html_ac03bf5af46f8e27151c8486596699c24"><div class="ttname"><a href="main_8h.html#ac03bf5af46f8e27151c8486596699c24">get_sticks</a></div><div class="ttdeci">void get_sticks(int p_id)</div><div class="ttdoc">gets the left and right sticks next to this particular philosopher (p_id). To do so the pthread_mutex...</div><div class="ttdef"><b>Definition:</b> monitor.c:10</div></div>
 <div class="ttc" id="main_8h_html_aea8ce703c461f82960cffd6ec5342c83"><div class="ttname"><a href="main_8h.html#aea8ce703c461f82960cffd6ec5342c83">disp_philo_states</a></div><div class="ttdeci">void disp_philo_states()</div><div class="ttdoc">prints out the current state of each philosopher in a row based view within the shell/IDE. The view works like this: p_id_0 + p_state_0 + &amp;quot; &amp;quot; .. p_id_NPHILO + p_state_NPHILO + &amp;quot; &amp;quot; </div><div class="ttdef"><b>Definition:</b> monitor.c:59</div></div>
-<div class="ttc" id="main_8h_html_a3bb3a041151f4e245ca4151fdb60aa94"><div class="ttname"><a href="main_8h.html#a3bb3a041151f4e245ca4151fdb60aa94">handle_quit</a></div><div class="ttdeci">void handle_quit(char first_char)</div><div class="ttdoc">handle_quit take the first character of the input and checks if it is a q or Q. If so release all Phi...</div><div class="ttdef"><b>Definition:</b> main.c:60</div></div>
+<div class="ttc" id="main_8h_html_a3bb3a041151f4e245ca4151fdb60aa94"><div class="ttname"><a href="main_8h.html#a3bb3a041151f4e245ca4151fdb60aa94">handle_quit</a></div><div class="ttdeci">void handle_quit(char first_char)</div><div class="ttdoc">handle_quit take the first character of the input and checks if it is a q or Q. If so release all Phi...</div><div class="ttdef"><b>Definition:</b> main.c:61</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 17 2013 21:26:45 for Dining Philosophers by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Nov 19 2013 11:19:37 for My Project by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.5
 </small></address>
