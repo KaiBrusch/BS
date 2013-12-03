@@ -358,7 +358,7 @@ void init_pagefile(const char *pfname) {
         exit(EXIT_FAILURE);
     }
     
-    int writing_result = fwrite(data, sizeof(int), NoOfElements, pagefile);
+    int writing_result = fwrite(data, sizeof(int), no_of_elements, pagefile);
     if(!writing_result) {
         perror("Error creating pagefile");
         exit(EXIT_FAILURE);
@@ -386,7 +386,7 @@ void vmem_init(){
     	perror("Shared Memory creation failed!");
     	exit(EXIT_FAILURE);
     }
-    if(ftruncate(shared_memory_file_desc, SHMSIZE) != 0) {
+    if(ftrunte(shared_memory_file_desc, SHMSIZE) != 0) {
     	perror("Shared Memory creation(truncate) failed!");
     	exit(EXIT_FAILURE);
     }
