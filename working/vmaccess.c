@@ -88,7 +88,7 @@ int read_page(int page, int offset) {
     return vmem->data[index];
 }
 
-int calcIndexFromPageOffset(int page, int offset) {
+int calc_index_from_poffset(int page, int offset) {
     return (vmem->pt.entries[page].frame*VMEM_PAGESIZE) + offset;
 }
 
@@ -140,7 +140,7 @@ void write_page(int page, int offset, int data) {
     // into the pagefile.bin
     vmem->pt.entries[page].flags |= PTF_DIRTY;
     
-    int index = calcIndexFromPageOffset(page, offset);
+    int index = calc_index_from_poffset(page, offset);
     // DEBUG(fprintf(stderr, "Write: Page: %d Offset: %d Data: %d\n", page, offset, data));
     vmem->data[index] = data;
 }
