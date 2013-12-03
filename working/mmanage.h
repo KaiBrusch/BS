@@ -49,11 +49,11 @@ int find_remove_frame(void);
 
 int use_algorithm(void);
 
-int find_remove_fifo(void);
+int fifo(void);
 
-int find_remove_clock(void);
+int mclock(void);
 
-int find_remove_clock2(void);
+int mclock2(void);
 
 void signal_proccessing_loop(void);
 
@@ -95,9 +95,8 @@ void dump_vmem_structure();
 #define MMANAGE_LOGFNAME "./logfile.txt"        /**< logfile name */
 
 #define VMEM_ALGO_FIFO  0
-#define VMEM_ALGO_LRU   1
-#define VMEM_ALGO_CLOCK 2
-#define VMEM_ALGO_CLOCK2 3
+#define VMEM_ALGO_CLOCK 1
+#define VMEM_ALGO_CLOCK2 2
 
 #define MY_RANDOM_MOD 123
 
@@ -105,9 +104,5 @@ void dump_vmem_structure();
                            init_pagefile */
 
 #define VOID_IDX -1
-
-/* Edit to modify algo, or remove line and provide
- * -DVMEM_ALGO ... compiler flag*/
-/* #define VMEM_ALGO VMEM_ALGO_FIFO */
 
 #endif /* MMANAGE_H */

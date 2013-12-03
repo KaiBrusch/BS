@@ -61,7 +61,7 @@ int vmem_read(int address) {
     // mmanage diese Page laden kann
     vmem->adm.req_pageno = page;
     
-    sem_wait(&vmem->adm.sema);	// <- verhindert komischen freeze
+    sem_wait(&vmem->adm.sema);
     
     
     int flags = vmem->pt.entries[page].flags;
@@ -69,14 +69,13 @@ int vmem_read(int address) {
     int req_page_is_loaded = ((flags & PTF_PRESENT) == PTF_PRESENT);
     
     if (!req_page_is_loaded) {
-	// DEBUG(fprintf(stderr, "Pagefult for reading!\n"));
 	kill(vmem->adm.mmanage_pid, SIGUSR1);
 	sem_wait(&vmem->adm.sema);
     }
     
     result = read_page(page, offset);
     
-    sem_post(&vmem->adm.sema);	// <- verhindert komischen freeze
+    sem_post(&vmem->adm.sema);
     
     return result;
 }
@@ -84,7 +83,6 @@ int vmem_read(int address) {
 int read_page(int page, int offset) {	
     countUsed(page);
     int index = calcIndexFromPageOffset(page, offset);
-    // DEBUG(fprintf(stderr, "Reading: Page: %d Offset: %d\n", page, offset));
     return vmem->data[index];
 }
 

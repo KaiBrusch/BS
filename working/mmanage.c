@@ -1,21 +1,11 @@
 /* Description: Memory Manager BSP3*/
 /* Prof. Dr. Wolfgang Fohl, HAW Hamburg */
-/* Winter 2010/2011
- * 
+/* 
  * This is the memory manager process that
  * works together with the vmaccess process to
  * mimic virtual memory management.
  *
- * The memory manager process will be invoked
- * via a SIGUSR1 signal. It maintains the page table
- * and provides the data pages in shared memory
- *
- * This process is initiating the shared memory, so
- * it has to be started prior to the vmaccess process
- *
- * TODO:
- * currently nothing
- * */
+*/
 
 #include "mmanage.h"
 
@@ -91,8 +81,8 @@ int
 }
 
 void signal_proccessing_loop() {
-    fprintf(stderr, "Memory Manager: pid(%d)\n", getpid());
-    fprintf(stderr, "Memory Manager running...\n");
+    //fprintf(stderr, "Memory Manager: pid(%d)\n", getpid());
+    fprintf(stderr, "Started Memory Manager...\n");
     while(1) {
 	signal_number = 0;
 	pause();
@@ -102,7 +92,7 @@ void signal_proccessing_loop() {
 	  dump_vmem_structure();
 	}
 	else if(signal_number == SIGINT) {
-	  char *msg = "Signal recieved(SIGINT): Quitting...\n";
+	  char *msg = "Signal received(SIGINT): Quitting...\n";
 	  noticed(msg);
 	  cleanup();
 	  break;
@@ -218,17 +208,17 @@ int find_remove_frame(){
 
 int use_algorithm() {
 #ifdef FIFO
-    return find_remove_fifo();
+    return fifo();
 #endif
 #ifdef CLOCK
-    return find_remove_clock();
+    return mclock();
 #endif
 #ifdef CLOCK2
-    return find_remove_clock2();
+    return mclock2();
 #endif
 }
 
-int find_remove_fifo() {
+int fifo() {
     int frame = vmem->adm.next_alloc_idx;
     // naechsten index weiter rotieren
     increment_alloc_idx(frame);
@@ -240,7 +230,7 @@ void increment_alloc_idx(int alloc_idx) {
     vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
 }
 
-int find_remove_clock() {
+int mclock() {
     int frame;
     int done = 0;
     
@@ -286,7 +276,7 @@ void fetch_page(int page) {
     }
 }
 
-int find_remove_clock2() {
+int mclock2() {
     int frame;
     int done = 0;
     
