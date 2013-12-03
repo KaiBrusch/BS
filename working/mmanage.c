@@ -386,7 +386,7 @@ void vmem_init(){
     	perror("Shared Memory creation failed!");
     	exit(EXIT_FAILURE);
     }
-    if(ftrunte(shared_memory_file_desc, SHMSIZE) != 0) {
+    if(ftruncate(shared_memory_file_desc, SHMSIZE) != 0) {
     	perror("Shared Memory creation(truncate) failed!");
     	exit(EXIT_FAILURE);
     }
