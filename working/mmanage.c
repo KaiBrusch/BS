@@ -19,9 +19,6 @@ int signal_number = 0;
 int shared_memory_file_desc;
 
 
-// Usage: DEBUG(fprintf(stderr, "blubb bla bluff\n"));
-
-
 int
  main(void)
 {
