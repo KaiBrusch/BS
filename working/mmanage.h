@@ -69,8 +69,6 @@ void open_logfile();
 // the process is ending
 void cleanup();
 
-int vmem_is_full();
-
 // log everthing given in this logevent
 void logger(struct logevent le);
 
@@ -80,6 +78,7 @@ void logger(struct logevent le);
 void noticed(char *msg);
 
 void update_load(int frame);
+
 void update_unload(int oldpage);
 
 void page_fault();

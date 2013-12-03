@@ -25,13 +25,10 @@
 typedef unsigned int Bmword;    /* Frame bitmap */
 
 /* Sizes */
-// adressraum das den prozesen vorgegaukelt wird
 #define VMEM_VIRTMEMSIZE 1024   /* Process address space / items */
 
-// unser Shared Memory(RAM)
 #define VMEM_PHYSMEMSIZE  128   /* Physical memory / items */
 
-// jede page hat 8 speicherstellen
 #define VMEM_PAGESIZE       8   /* Items per page */
 
 // Anzahl der Pages in unserem Prozessadressraum

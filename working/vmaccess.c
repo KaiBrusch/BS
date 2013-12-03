@@ -49,7 +49,9 @@ void vm_init(){
 }
 
 int vmem_read(int address) {
-    vm_init_if_not_ready();
+    if(vmem == NULL) {
+        vm_init();
+    }
     
     int result;
     // page und offset berechnen.
@@ -81,8 +83,8 @@ int vmem_read(int address) {
 }
 
 int read_page(int page, int offset) {	
-    countUsed(page);
-    int index = calcIndexFromPageOffset(page, offset);
+    count_used(page);
+    int index = calc_index_from_poffset(page, offset);
     return vmem->data[index];
 }
 
@@ -90,7 +92,7 @@ int calcIndexFromPageOffset(int page, int offset) {
     return (vmem->pt.entries[page].frame*VMEM_PAGESIZE) + offset;
 }
 
-void countUsed(int page) {
+void count_used(int page) {
     // if USED bit 1 is already set, then set the second used bit.
     int used_1_is_set = vmem->pt.entries[page].flags & PTF_USED;
     if(used_1_is_set) {
@@ -101,7 +103,10 @@ void countUsed(int page) {
 }
 
 void vmem_write(int address, int data) {
-    vm_init_if_not_ready();
+    if(vmem == NULL) {
+        vm_init();
+    }
+
     // page und offset berechnen.
     int page = address / VMEM_PAGESIZE;
     int offset = address % VMEM_PAGESIZE;
@@ -129,7 +134,7 @@ void vmem_write(int address, int data) {
 }
 
 void write_page(int page, int offset, int data) {
-    countUsed(page);
+    count_used(page);
     
     // mark the change and to make sure it'll be updated
     // into the pagefile.bin
@@ -138,13 +143,6 @@ void write_page(int page, int offset, int data) {
     int index = calcIndexFromPageOffset(page, offset);
     // DEBUG(fprintf(stderr, "Write: Page: %d Offset: %d Data: %d\n", page, offset, data));
     vmem->data[index] = data;
-}
-
-
-void vm_init_if_not_ready() {
-    if(vmem == NULL) {
-        vm_init();
-    }
 }
 
 void dump() {
