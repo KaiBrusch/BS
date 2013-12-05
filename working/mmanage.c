@@ -25,9 +25,6 @@ int signal_number = 0;
 
 int shared_memory_file_desc;
 
-// Usage: DEBUG(fprintf(stderr, "hallo!! %d\n", die_nummer));
-
-
 int
  main(void)
 {
@@ -35,7 +32,7 @@ int
     struct sigaction sigact;
 
     /* Init pagefile */
-    init_pagefile(MMANAGE_PFNAME);
+    init_pagefile();
 
     /* Open logfile */
     open_logfile();
@@ -95,14 +92,22 @@ void signal_proccessing_loop() {
     	pause();
 
     	if(signal_number == SIGUSR2) {
-    	  char *msg = "Signal recieved(SIGUSR2): dumping virtual memory.\n";
-    	  noticed(msg);
-    	  dump_vmem_structure();
+
+#ifdef DEBUG_MESSAGES
+           fprintf(stderr, "Signal recieved(SIGUSR2): dumping virtual memory.\n");
+#endif
+
+           signal_number = 0;
+           dump_vmem_structure();
     	} else if(signal_number == SIGINT) {
-    	  char *msg = "Signal recieved(SIGINT): Quitting...\n";
-    	  noticed(msg);
-    	  cleanup();
-    	  break;
+
+#ifdef DEBUG_MESSAGES
+           fprintf(stderr, "Signal recieved(SIGINT): Quitting...\n");
+#endif
+
+           signal_number = 0;
+    	   cleanup();
+    	   break;
     	}
     }
 }
@@ -154,8 +159,12 @@ void sighandler(int signo) {
     
     // page fault has to be processed inside sig_handler
     if(signal_number == SIGUSR1) {
-        char *msg = "Signal recieved(SIGUSR1): Processing Pagefault\n";
-        noticed(msg);
+
+#ifdef DEBUG_MESSAGES
+        fprintf(stderr, "Signal recieved(SIGUSR1): Processing Pagefault\n");
+#endif
+           
+        signal_number = 0;
         page_fault();
     }
 }
@@ -183,15 +192,6 @@ void cleanup(){
     fclose(pagefile);
     
     printf("Quit!\n");
-}
-
-void noticed(char *msg) {
-
-#ifdef DEBUG_MESSAGES
-    fprintf(stderr, msg);
-#endif
-
-    signal_number = 0;
 }
 
 int find_frame(){
@@ -350,17 +350,17 @@ void update_pt(int frame){
     vmem->pt.entries[req_page].flags |= PTF_PRESENT;
 }
 
-void init_pagefile(const char *pfname) {
+void init_pagefile() {
     int no_elements = VMEM_NPAGES*VMEM_PAGESIZE;
     int data[no_elements];
     
     srand(SEED_PF);
     // fill with random data. using our own rand_mod
     for(int i=0; i < no_elements; i++) {
-	   data[i] = rand() % MY_RANDOM_MOD;
+	   data[i] = rand() % 1000;
     }
     
-    pagefile = fopen(pfname, "w+b");
+    pagefile = fopen(PAGEFILE, "w+b");
     if(!pagefile) {
         perror("Error creating pagefile!\n");
         exit(EXIT_FAILURE);
@@ -379,7 +379,7 @@ void init_pagefile(const char *pfname) {
 }
 
 void open_logfile(){
-    logfile = fopen(MMANAGE_LOGFNAME, "w");
+    logfile = fopen(LOGFILE, "w");
     if(!logfile) {
         perror("Error creating logfile!\n");
         exit(EXIT_FAILURE);

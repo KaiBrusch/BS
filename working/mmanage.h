@@ -17,7 +17,6 @@
 
 
 /** Event struct for logging */
-// struct for the logging event
 struct logevent {
     int req_pageno;
     int replaced_page;
@@ -57,15 +56,15 @@ void signal_proccessing_loop(void);
 
 
 /* Physical Memory */
-#define MMANAGE_PFNAME "./pagefile.bin"
+#define PAGEFILE "./pagefile.bin"		/**< pagefile name */
 
-void init_pagefile(const char *pfname);
+void init_pagefile();
 
 void page_fault();
 
 
 /* Administrative Procedures */
-#define MMANAGE_LOGFNAME "./logfile.txt"        /**< logfile name */
+#define LOGFILE "./logfile.txt"        /**< logfile name */
 
 void cleanup();
 
@@ -73,17 +72,11 @@ void logger(struct logevent le);
 
 void open_logfile();
 
-void noticed(char *msg);
-
 void dump_vmem_structure();
 
 
-/* Misc */
-
-#define MY_RANDOM_MOD 123
-
-#define SEED_PF 123456        /**< Get reproducable pseudo-random numbers for
-                           init_pagefile */
+/* Random & Misc */
+#define SEED_PF 123456        
 
 #define VOID_IDX -1
 
