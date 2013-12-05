@@ -43,16 +43,18 @@ void store_page(int pt_idx);
 
 void update_pt(int frame);
 
-int find_remove_frame(void);
+// ALGORITHMS
+int find_frame(void);
 
-int use_algorithm(void);
+int choose_algo(void);
 
-int find_remove_fifo(void);
+int start_fifo(void);
 
-int find_remove_clock(void);
+int start_clock(void);
 
-int find_remove_clock2(void);
+int start_clock2(void);
 
+// SIGNALS
 void signal_proccessing_loop(void);
 
 // checks if a SIGUSR1 was caught and calls page_fault()
@@ -92,18 +94,6 @@ void dump_vmem_structure();
 #define MMANAGE_LOGFNAME "./logfile.txt"        /**< logfile name */
 
 #define MY_RANDOM_MOD 123
-
-#ifdef FIFO
-#define ALGO_STR "FIFO"
-#endif
-
-#ifdef CLOCK
-#define ALGO_STR "CLOCK"
-#endif
-
-#ifdef CLOCK2
-#define ALGO_STR "CLOCK2"
-#endif
 
 #define SEED_PF 123456        /**< Get reproducable pseudo-random numbers for
                            init_pagefile */

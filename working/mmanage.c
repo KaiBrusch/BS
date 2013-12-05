@@ -88,12 +88,12 @@ int
 
 void signal_proccessing_loop() {
     fprintf(stderr, "Memory Manager at pid(%d).\n", getpid());
-    char *algo_str = ALGO_STR;
-    fprintf(stderr, "Memory Manager is using %s algorithm. Active...\n", algo_str);
 
     while(1) {
+
     	signal_number = 0;
     	pause();
+        
     	if(signal_number == SIGUSR2) {
     	  char *msg = "Signal recieved(SIGUSR2): dumping virtual memory.\n";
     	  noticed(msg);
@@ -121,7 +121,7 @@ void page_fault() {
 
     vmem->adm.pf_count++;
     
-    new_frame = find_remove_frame();
+    new_frame = find_frame();
     
     page_unloaded = vmem->pt.framepage[new_frame];
     
@@ -199,7 +199,7 @@ void noticed(char *msg) {
     signal_number = 0;
 }
 
-int find_remove_frame(){
+int find_frame(){
     int frame = VOID_IDX;
     if(!frames_are_occupied()) {
     	frame = vmem->adm.size;
@@ -210,7 +210,7 @@ int find_remove_frame(){
 #endif
 
     } else {
-	   frame = use_algorithm();
+	   frame = choose_algo();
 
 #ifdef DEBUG_MESSAGES
 	   fprintf(stderr, "New Frame: %d (by algorithm)\n", frame);
@@ -229,19 +229,19 @@ int find_remove_frame(){
     return frame;
 }
 
-int use_algorithm() {
+int choose_algo() {
 #ifdef FIFO
-    return find_remove_fifo();
+    return start_fifo();
 #endif
 #ifdef CLOCK
-    return find_remove_clock();
+    return start_clock();
 #endif
 #ifdef CLOCK2
-    return find_remove_clock2();
+    return start_clock2();
 #endif
 }
 
-int find_remove_fifo() {
+int start_fifo() {
     int frame = vmem->adm.next_alloc_idx;
     rotate_alloc_idx();
     return frame;
@@ -253,7 +253,7 @@ void rotate_alloc_idx() {
     vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
 }
 
-int find_remove_clock() {
+int start_clock() {
     int frame = VOID_IDX;
     
     while( frame == VOID_IDX ) {
@@ -299,7 +299,7 @@ void fetch_page(int page) {
     }
 }
 
-int find_remove_clock2() {
+int start_clock2() {
     int frame = VOID_IDX;
     
     while( frame == VOID_IDX ) {
