@@ -1,6 +1,6 @@
 /* Description: Memory Manager BSP3*/
 /* Prof. Dr. Wolfgang Fohl, HAW Hamburg */
- /* 
+ /*
  * This is the memory manager process that
  * works together with the vmaccess process to
  * mimic virtual memory management.
@@ -13,7 +13,7 @@
  * it has to be started prior to the vmaccess process
  *
  * TODO:
- * currently nothing
+
  * */
 
 #include "mmanage.h"
@@ -25,9 +25,9 @@ int signal_number = 0;
 
 int shm_file_descriptor;
 
-/* MAIN */
+/* Main section */
 int main(void){
-    
+
     struct sigaction sigact;
 
     init_pagefile();
@@ -35,56 +35,56 @@ int main(void){
     open_logfile();
 
     vmem_init();
-    
-    /* Setup signal handler */
-    /* Handler for USR1 */
+
+    // initializing signal handler
+    // installing the signal handler for SIGUSR1
     sigact.sa_handler = sighandler;
     sigemptyset(&sigact.sa_mask);
     sigact.sa_flags = 0;
     if(sigaction(SIGUSR1, &sigact, NULL) != 0) {
-        perror("Error installing signal handler for USR1!\n");
+        perror("ATTENTION: Failed to install signal handler for SIGUSR1!\n");
         exit(EXIT_FAILURE);
-    } 
+    }
 
 #ifdef DEBUG_MESSAGES
     else {
-        fprintf(stderr, "USR1 handler successfully installed.\n");
+        fprintf(stderr, "SUCCESS: SIGUSR1 handler successfully installed.\n");
     }
 #endif
 
     if(sigaction(SIGUSR2, &sigact, NULL) != 0) {
-        perror("Error installing signal handler for USR2!\n");
+        perror("ATTENTION: Failed to install signal handler for SIGUSR2!\n");
         exit(EXIT_FAILURE);
     }
 
 #ifdef DEBUG_MESSAGES
     else {
-        fprintf(stderr, "USR2 handler successfully installed.\n");
+        fprintf(stderr, "SUCCESS: SIGUSR2 handler successfully installed.\n");
     }
 #endif
 
     if(sigaction(SIGINT, &sigact, NULL) != 0) {
-        perror("Error installing signal handler for INT!\n");
+        perror("ATTENTION: Failed to install signal handler for SIGINT!\n");
         exit(EXIT_FAILURE);
     }
 
 #ifdef DEBUG_MESSAGES
     else {
-        fprintf(stderr, "INT handler successfully installed.\n");
+        fprintf(stderr, "SUCCESS: SIGINT handler successfully installed.\n");
     }
 #endif
 
     signal_proccessing_loop();
-    
+
     exit(EXIT_SUCCESS);
 }
-/* End Main */
+/* End Main Section */
 
 
 
-/* Signal Processing */
+/* Signal Processing Section */
 void signal_proccessing_loop() {
-    fprintf(stderr, "Memory Manager at pid(%d).\n", getpid());
+    fprintf(stderr, "UPDATE: Memory Manager is at pid(%d).\n", getpid());
 
     while(1) {
 
@@ -94,7 +94,7 @@ void signal_proccessing_loop() {
     	if(signal_number == SIGUSR2) {
 
 #ifdef DEBUG_MESSAGES
-           fprintf(stderr, "Signal recieved(SIGUSR2): dumping virtual memory.\n");
+           fprintf(stderr, "UPDATE: Signal recieved(SIGUSR2) for dumping virtual memory.\n");
 #endif
 
            signal_number = 0;
@@ -102,7 +102,7 @@ void signal_proccessing_loop() {
     	} else if(signal_number == SIGINT) {
 
 #ifdef DEBUG_MESSAGES
-           fprintf(stderr, "Signal recieved(SIGINT): Quitting...\n");
+           fprintf(stderr, "UPDATE: Signal recieved(SIGINT) for quitting\n");
 #endif
 
            signal_number = 0;
@@ -114,14 +114,14 @@ void signal_proccessing_loop() {
 
 void sighandler(int signo) {
     signal_number = signo;
-    
-    // page fault has to be processed inside sig_handler
+
+    // SIGUSR1 has been assigned to page fault, this will occur if a page fault occurs
     if(signal_number == SIGUSR1) {
 
 #ifdef DEBUG_MESSAGES
-        fprintf(stderr, "Signal recieved(SIGUSR1): Processing Pagefault\n");
+        fprintf(stderr, "UPDATE: Signal recieved(SIGUSR1) for page fault\n");
 #endif
-           
+
         signal_number = 0;
         page_fault();
     }
@@ -132,28 +132,28 @@ void page_fault() {
     int new_frame = VOID_IDX;
     int req_page = vmem->adm.req_pageno;
 
+    // page fault debug message for log
 #ifdef DEBUG_MESSAGES
-    fprintf(stderr, "\n<=== Pagefault ===>\n");
-    // A Pagefault has occured
+    fprintf(stderr, "\n ATTENTION: Pagefault Occured \n");
     fprintf(stderr, "Requested Page: %d\n", req_page);
-#endif  
+#endif
 
     vmem->adm.pf_count++;
-    
+
     new_frame = find_frame();
-    
+
     new_page = vmem->pt.framepage[new_frame];
-    
+
     if( vmem->adm.size >= VMEM_NFRAMES ) {
 	   store_page(new_page);
     }
 
     update_pagetable(new_frame);
-    
+
     fetch_page(req_page);
-    
-    
-    // make Logs
+
+
+    // we are logging events to ensure transparency
     struct logevent le;
     le.req_pageno = vmem->adm.req_pageno;
     le.replaced_page = new_page;
@@ -163,17 +163,18 @@ void page_fault() {
     logger(le);
 
 #ifdef DEBUG_MESSAGES
-    fprintf(stderr, "Page loaded. pf_count: %d\n", vmem->adm.pf_count);
-#endif  
+    fprintf(stderr, "UPDATE: Page loaded. pf_count: %d\n", vmem->adm.pf_count);
+#endif
 
-    // free the calling process
+// sem_post to free up semaphore
     sem_post(&vmem->adm.sema);
 }
-/* End Signal Processing */
+// end signal processing section
 
 
+/*  Algorithm Section
+    contains: fifo, clock and clock 2 algorithms */
 
-/* Algorithms */
 int find_frame(){
     int frame = VOID_IDX;
     if( vmem->adm.size < VMEM_NFRAMES ) {
@@ -181,22 +182,22 @@ int find_frame(){
         vmem->adm.size += 1;
 
 #ifdef DEBUG_MESSAGES
-        fprintf(stderr, "New Frame: %d (by free space)\n", frame);
+        fprintf(stderr, "UPDATE: New Frame: %d (by free space)\n", frame);
 #endif
 
     } else {
        frame = choose_algo();
 
 #ifdef DEBUG_MESSAGES
-       fprintf(stderr, "New Frame: %d (by algorithm)\n", frame);
+       fprintf(stderr, "UPDATE: New Frame: %d (by algorithm)\n", frame);
 #endif
 
     }
-    
+
     if(frame == VOID_IDX) {
 
 #ifdef DEBUG_MESSAGES
-       fprintf(stderr, "<================= FAIL returned Frame is -1 ==============>\n");
+       fprintf(stderr, "ATTENTION: FAIL, returned Frame is -1");
 #endif
 
        exit(EXIT_FAILURE);
@@ -222,14 +223,15 @@ int start_fifo() {
     return frame;
 }
 
+//clock
 int start_clock() {
     int frame = VOID_IDX;
-    
+
     while( frame == VOID_IDX ) {
         int alloc_idx = vmem->adm.next_alloc_idx;
         int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
         int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
-        
+
         if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
             vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT1;
             incr_alloc_idx();
@@ -238,29 +240,32 @@ int start_clock() {
         }
     }
     incr_alloc_idx();
-    
+
     return frame;
 }
 
+
+
+// clock2 will also check for the second used bit
+// if the first USED bit is set, delete the second
+// if the second was not deleted, delete the first one
 int start_clock2() {
     int frame = VOID_IDX;
-    
+
     while( frame == VOID_IDX ) {
     	int alloc_idx = vmem->adm.next_alloc_idx;
     	int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
     	int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
-    	
-    	// if the first USED bit is set, delete the second
-    	// if the second was not deleted, delete the first one
+
         if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
     	   int is_second_frame_flag_used = (flags & PTF_USEDBIT2) == PTF_USEDBIT2;
-    	   
+
     	   if( is_second_frame_flag_used ) {
     	       vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT2;
     	   } else {
     	       vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT1;
     	   }
-    	    
+
     	   // current frame was not eligible so we rotate to the next.
     	   incr_alloc_idx();
     	} else {
@@ -268,7 +273,7 @@ int start_clock2() {
     	}
     }
     incr_alloc_idx();
-    
+
     return frame;
 }
 
@@ -276,11 +281,11 @@ void incr_alloc_idx() {
     vmem->adm.next_alloc_idx++;
     vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
 }
-/* End Algorithms */
+/* End Algorithm Section */
 
 
 
-/* Page Table functions */
+/* Page Table Functions Section */
 void store_page(int page) {
     int frame_has_changed = (vmem->pt.entries[page].flags & PTF_CHANGED) == PTF_CHANGED;
     if(frame_has_changed) {
@@ -289,7 +294,7 @@ void store_page(int page) {
         fseek(pagefile, sizeof(int)*VMEM_PAGESIZE*page, SEEK_SET);
         int write_to_page = fwrite(&vmem->data[VMEM_PAGESIZE*frame], sizeof(int), VMEM_PAGESIZE, pagefile);
         if(write_to_page != VMEM_PAGESIZE) {
-            perror("Not everything could be written into the page!\n");
+            perror("ATTENTION: Write was not successful!\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -300,70 +305,70 @@ void fetch_page(int page) {
     fseek(pagefile, sizeof(int)*VMEM_PAGESIZE*page, SEEK_SET);
     int readen_ints = fread(&vmem->data[VMEM_PAGESIZE*frame], sizeof(int), VMEM_PAGESIZE, pagefile);
     if(readen_ints != VMEM_PAGESIZE) {
-       perror("Not everything could be read!\n");
+       perror("ATTENTION: Read was not successful!\n");
        exit(EXIT_FAILURE);
     }
 }
 
 void update_pagetable(int frame){
-    // unset old page
+    // unset previous page
     int oldpage = vmem->pt.framepage[frame];
 
 #ifdef DEBUG_MESSAGES
-    fprintf(stderr, "Update Table: Oldpage: %d OldFrame: %d\n", oldpage, frame);
+    fprintf(stderr, "UPDATE: Oldpage: %d OldFrame: %d\n", oldpage, frame);
 #endif
 
-    // delete all flags
+    // setting a flag to 0 will delete the flag
     vmem->pt.entries[oldpage].flags = 0;
-    // delete the reference to the frame itwas occupiding
+    // after deleting the flag we need to also delete the reference
     vmem->pt.entries[oldpage].frame = VOID_IDX;
-    
-    // update loaded state
+
+    // after deleting the reference we have to update the state
     int req_page = vmem->adm.req_pageno;
     vmem->pt.framepage[frame] = req_page;
     vmem->pt.entries[req_page].frame = frame;
     vmem->pt.entries[req_page].flags |= PTF_PRESENT;
 }
-/* End Page Table functions */
+/* End Page Table Functions Section */
 
 
-/* Initialization */
+/* Initialization Section */
 void vmem_init(){
 
     shm_file_descriptor = shm_open(SHMKEY, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if(!shm_file_descriptor) {
-    	perror("Bad shared memory file descriptor!\n");
+    	perror("ATTENTION: Bad shared memory file descriptor!\n");
     	exit(EXIT_FAILURE);
     }
 
     if(ftruncate(shm_file_descriptor, SHMSIZE) == -1) {
-    	perror("Shared memory could not be truncated with the specified size!\n");
+    	perror("ATTENTION: Shared memory did not fit in the specified space!\n");
     	exit(EXIT_FAILURE);
     }
 
     vmem = mmap(NULL, SHMSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_file_descriptor, 0);
     if(!vmem){
-    	perror("Shared Memory could not be mapped into 'vmem'!\n");
+    	perror("ATTENTION: Shared Memory could not be mapped into 'vmem'!\n");
     	exit(EXIT_FAILURE);
     }
 
 #ifdef DEBUG_MESSAGES
-    fprintf(stderr, "Shared Virtual Memory space created. Initializing....\n");
+    fprintf(stderr, "SUCCESS: Shared Vmem created. Initializing now\n");
 #endif
 
     vmem_init_null_data();
-    
-    // initialize Semaphore
+
+    // initialize with semaphore(&sem, 1,0)
     int sem = sem_init(&vmem->adm.sema, 1, 0);
     if(sem != 0) {
-    	perror("Semaphor initialization failed!\n");
+    	perror("ATTENTION: Semaphor has not been initialized!\n");
     	exit(EXIT_FAILURE);
     }
-    
+
     init_pagetable_framepage_data();
 
 #ifdef DEBUG_MESSAGES
-    fprintf(stderr, "Virtual Memory sucessfully created and accessible.\n");
+    fprintf(stderr, "SUCCESS: Vmem sucessfully created\n");
 #endif
 
 }
@@ -371,7 +376,7 @@ void vmem_init(){
 void init_pagefile() {
     int no_elements = VMEM_NPAGES*VMEM_PAGESIZE;
     int data[no_elements];
-    
+
     srand(SEED_PF);
     // fill with random data. using our own rand_mod
     for(int i=0; i < no_elements; i++) {
@@ -380,33 +385,33 @@ void init_pagefile() {
 
     pagefile = fopen(PAGEFILE, "w+b");
     if(!pagefile) {
-        perror("Error creating pagefile!\n");
+        perror("ATTENTION: Error creating pagefile!\n");
         exit(EXIT_FAILURE);
     }
-    
+
     int write_to_page = fwrite(data, sizeof(int), no_elements, pagefile);
     if(!write_to_page) {
-        perror("Error creating pagefile!\n");
+        perror("ATTENTION: Error creating pagefile!\n");
         exit(EXIT_FAILURE);
     }
 
 #ifdef DEBUG_MESSAGES
-    fprintf(stderr, "Pagefile created.\n");
+    fprintf(stderr, "SUCCESS: Pagefile created.\n");
 #endif
 
 }
 
 void init_pagetable_framepage_data(){
-    // pagetable
+    // pagetable for loop
     for(int i = 0; i < VMEM_NPAGES; i++) {
         vmem->pt.entries[i].flags = 0;
         vmem->pt.entries[i].frame = VOID_IDX;
     }
-    // framepage
+    // framepage for loop
     for(int i = 0; i < VMEM_NFRAMES; i++) {
        vmem->pt.framepage[i] = VOID_IDX;
     }
-    // data
+    // data for loop
     for(int i = 0; i < (VMEM_NFRAMES * VMEM_PAGESIZE); i++) {
        vmem->data[i] = VOID_IDX;
     }
@@ -420,17 +425,17 @@ void vmem_init_null_data(){
     vmem->adm.next_alloc_idx = 0;
     vmem->adm.pf_count = 0;
 }
-/* End Initialization */
+/* End Initialization Section */
 
 
 
-/* Administrative Functions */
+/* Administrative Functions Section */
 void dump_vmem_structure() {
-    fprintf(stderr, " <========== DUMP OF VMEM =========> \n");
+    fprintf(stderr, "___ DUMPING VMEM ___\n");
     fprintf(stderr, "Administrative Structures:\n");
     fprintf(stderr, "Filled: %d, Next_request: %d pf_count: %d Next_alloc_idx: %d\n",
         vmem->adm.size, vmem->adm.req_pageno, vmem->adm.pf_count, vmem->adm.next_alloc_idx);
-    fprintf(stderr, " <========== Data in vmem =========> \n");
+    fprintf(stderr, " ___ DATA IN VMEM ___\n");
     fprintf(stderr, "(index, data)\n");
     for(int i = 0; i < (VMEM_NFRAMES * VMEM_PAGESIZE); i++) {
        fprintf(stderr, "(%d, %d) \n", i, vmem->data[i]);
@@ -442,27 +447,27 @@ void cleanup(){
     munmap(vmem, SHMSIZE);
     close(shm_file_descriptor);
     shm_unlink(SHMKEY);
-    
+
     // close files
     fclose(logfile);
     fclose(pagefile);
-    
-    printf("Over and Out!\n");
+
+    printf("SUCESS: Succesful \n");
 }
-/* End Administrative Functions */
+/* End Administrative Functions Section */
 
 
 
-/* Logging */
+/* Logging Section */
 void open_logfile(){
     logfile = fopen(LOGFILE, "w");
     if(!logfile) {
-        perror("Error creating logfile!\n");
+        perror("ATTENTION: Error creating logfile!\n");
         exit(EXIT_FAILURE);
     }
 
 #ifdef DEBUG_MESSAGES
-    fprintf(stderr, "Logfile created.\n");
+    fprintf(stderr, "SUCCESS: Logfile created.\n");
 #endif
 
 }
