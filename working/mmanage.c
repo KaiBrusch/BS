@@ -434,10 +434,10 @@ void vmem_init_null_data(){
 /* Administrative Functions Section */
 void print_vmem() {
     fprintf(stderr, "< adm_struct >\n");
-    fprintf(stderr, "size: %d, pf_count: %d, 
-        req_pageno: %d, next_alloc_idx: %d\n",
-        vmem->adm.size, vmem->adm.req_pageno, 
-        vmem->adm.pf_count, vmem->adm.next_alloc_idx);
+    fprintf(stderr, "size: %d, pf_count: %d ",
+        vmem->adm.size, vmem->adm.req_pageno); 
+    fprintf(stderr, "req_pageno: %d, next_alloc_idx: %d\n",
+        vmem->adm.pf_count, vmem->adm.next_alloc_idx); 
     fprintf(stderr, "< data >\n");
     for(int i = 0; i < (VMEM_NFRAMES * VMEM_PAGESIZE); i++) {
        fprintf(stderr, "%d \n", vmem->data[i]);
