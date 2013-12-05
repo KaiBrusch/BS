@@ -34,13 +34,17 @@ void store_page(int pt_idx);
 
 void update_pt(int frame);
 
+void vmem_init_null_data();
+
+void init_pagetable_framepage_data();
+
 
 /* Algorithms */
 int find_frame(void);
 
 int choose_algo(void);
 
-void rotate_alloc_idx();
+void incr_alloc_idx();
 
 int start_fifo(void);
 

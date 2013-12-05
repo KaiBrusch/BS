@@ -23,7 +23,7 @@ FILE *pagefile = NULL;
 FILE *logfile = NULL;
 int signal_number = 0;
 
-int shared_memory_file_desc;
+int shm_file_descriptor;
 
 int
  main(void)
@@ -31,13 +31,10 @@ int
     
     struct sigaction sigact;
 
-    /* Init pagefile */
     init_pagefile();
 
-    /* Open logfile */
     open_logfile();
 
-    /* Create shared memory and init vmem structure */
     vmem_init();
     
     /* Setup signal handler */
@@ -184,7 +181,7 @@ void dump_vmem_structure() {
 void cleanup(){
     // delete shared memory
     munmap(vmem, SHMSIZE);
-    close(shared_memory_file_desc);
+    close(shm_file_descriptor);
     shm_unlink(SHMKEY);
     
     // close files
@@ -238,12 +235,12 @@ int choose_algo() {
 
 int start_fifo() {
     int frame = vmem->adm.next_alloc_idx;
-    rotate_alloc_idx();
+    incr_alloc_idx();
     return frame;
 }
 
 // rotates the pointer to the next alloc in fifo clock and clock2
-void rotate_alloc_idx() {
+void incr_alloc_idx() {
     vmem->adm.next_alloc_idx++;
     vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
 }
@@ -258,12 +255,12 @@ int start_clock() {
     	
     	if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
     	    vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT1;
-    	    rotate_alloc_idx();
+    	    incr_alloc_idx();
     	} else {
     	    frame = alloc_idx;
     	}
     }
-    rotate_alloc_idx();
+    incr_alloc_idx();
     
     return frame;
 }
@@ -301,30 +298,26 @@ int start_clock2() {
     	int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
     	int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
     	
-    	// if the first USED bit is set, then either delete
-    	// the second used bit or the first used bit.
-    	// else use this frame
-    	if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
-    	    int is_second_frame_flag_used = (flags & PTF_USEDBIT2) == PTF_USEDBIT2;
+    	// if the first USED bit is set, delete the second
+    	// if the second was not deleted, delete the first one
+        if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
+    	   int is_second_frame_flag_used = (flags & PTF_USEDBIT2) == PTF_USEDBIT2;
     	    
-    	    // if the second USED bit is also set,
-    	    // then unset it. else simply unset the first USED bit
-    	    if( is_second_frame_flag_used ) {
-    		vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT2;
-    	    }
-    	    else {
-    		vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT1;
-    	    }
+    	   // if the second USED bit is also set,
+    	   // then unset it. else simply unset the first USED bit
+    	   if( is_second_frame_flag_used ) {
+    	       vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT2;
+    	   } else {
+    	       vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT1;
+    	   }
     	    
-    	    // the counter is being rotated
-    	    // because the current observed frame
-    	    // wasn't taken
-    	    rotate_alloc_idx();
+    	   // current frame was not eligible so we rotate to the next.
+    	   incr_alloc_idx();
     	} else {
-    	    frame = alloc_idx;
+    	   frame = alloc_idx;
     	}
     }
-    rotate_alloc_idx();
+    incr_alloc_idx();
     
     return frame;
 }
@@ -366,8 +359,8 @@ void init_pagefile() {
         exit(EXIT_FAILURE);
     }
     
-    int writing_result = fwrite(data, sizeof(int), no_elements, pagefile);
-    if(!writing_result) {
+    int write_to_page = fwrite(data, sizeof(int), no_elements, pagefile);
+    if(!write_to_page) {
         perror("Error creating pagefile!\n");
         exit(EXIT_FAILURE);
     }
@@ -393,18 +386,19 @@ void open_logfile(){
 
 
 void vmem_init(){
-    // http://linux.die.net/man/3/shm_open
-    shared_memory_file_desc = shm_open(SHMKEY, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-    if(!shared_memory_file_desc) {
-    	perror("Shared Memory creation failed!\n");
-    	exit(EXIT_FAILURE);
-    }
-    if(ftruncate(shared_memory_file_desc, SHMSIZE) != 0) {
-    	perror("Shared Memory truncate creation failed!\n");
+
+    shm_file_descriptor = shm_open(SHMKEY, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+    if(!shm_file_descriptor) {
+    	perror("Bad shared memory file descriptor!\n");
     	exit(EXIT_FAILURE);
     }
 
-    vmem = mmap(NULL, SHMSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shared_memory_file_desc, 0);
+    if(ftruncate(shm_file_descriptor, SHMSIZE) == -1) {
+    	perror("Shared memory could not be truncated with the specified size!\n");
+    	exit(EXIT_FAILURE);
+    }
+
+    vmem = mmap(NULL, SHMSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_file_descriptor, 0);
     if(!vmem){
     	perror("Shared Memory could not be mapped into 'vmem'!\n");
     	exit(EXIT_FAILURE);
@@ -414,13 +408,7 @@ void vmem_init(){
     fprintf(stderr, "Shared Virtual Memory space created. Initializing....\n");
 #endif
 
-    // fill vmem with intial NULL-Data
-    vmem->adm.size = 0;
-    vmem->adm.mmanage_pid = getpid();
-    vmem->adm.shm_id = VOID_IDX;
-    vmem->adm.req_pageno = VOID_IDX;
-    vmem->adm.next_alloc_idx = 0;
-    vmem->adm.pf_count = 0;
+    vmem_init_null_data();
     
     // initialize Semaphore
     int sem = sem_init(&vmem->adm.sema, 1, 0);
@@ -429,27 +417,41 @@ void vmem_init(){
     	exit(EXIT_FAILURE);
     }
     
-    // initialize Page Table
-    for(int i = 0; i < VMEM_NPAGES; i++) {
-    	vmem->pt.entries[i].flags = 0;
-    	vmem->pt.entries[i].frame = VOID_IDX;
-    }
-    
-    // initialise Framepage
-    for(int i = 0; i < VMEM_NFRAMES; i++) {
-	   vmem->pt.framepage[i] = VOID_IDX;
-    }
-      
-    // initialize data
-    for(int i = 0; i < (VMEM_NFRAMES * VMEM_PAGESIZE); i++) {
-	   vmem->data[i] = VOID_IDX;
-    }
+    init_pagetable_framepage_data();
 
 #ifdef DEBUG_MESSAGES
     fprintf(stderr, "Virtual Memory sucessfully created and accessible.\n");
 #endif
 
 }
+
+
+// Initialization
+void init_pagetable_framepage_data(){
+    // pagetable
+    for(int i = 0; i < VMEM_NPAGES; i++) {
+        vmem->pt.entries[i].flags = 0;
+        vmem->pt.entries[i].frame = VOID_IDX;
+    }
+    // framepage
+    for(int i = 0; i < VMEM_NFRAMES; i++) {
+       vmem->pt.framepage[i] = VOID_IDX;
+    }
+    // data
+    for(int i = 0; i < (VMEM_NFRAMES * VMEM_PAGESIZE); i++) {
+       vmem->data[i] = VOID_IDX;
+    }
+}
+
+void vmem_init_null_data(){
+    vmem->adm.size = 0;
+    vmem->adm.mmanage_pid = getpid();
+    vmem->adm.shm_id = VOID_IDX;
+    vmem->adm.req_pageno = VOID_IDX;
+    vmem->adm.next_alloc_idx = 0;
+    vmem->adm.pf_count = 0;
+}
+
 
 /* Do not change!  */
 void
