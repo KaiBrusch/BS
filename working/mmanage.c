@@ -93,13 +93,12 @@ void signal_proccessing_loop() {
 
     	signal_number = 0;
     	pause();
-        
+
     	if(signal_number == SIGUSR2) {
     	  char *msg = "Signal recieved(SIGUSR2): dumping virtual memory.\n";
     	  noticed(msg);
     	  dump_vmem_structure();
-    	}
-    	else if(signal_number == SIGINT) {
+    	} else if(signal_number == SIGINT) {
     	  char *msg = "Signal recieved(SIGINT): Quitting...\n";
     	  noticed(msg);
     	  cleanup();
@@ -125,7 +124,7 @@ void page_fault() {
     
     page_unloaded = vmem->pt.framepage[new_frame];
     
-    if( frames_are_occupied() ) {
+    if( vmem->adm.size >= VMEM_NFRAMES ) {
 	   store_page(page_unloaded);
     }
     update_pt(new_frame);
@@ -154,14 +153,10 @@ void sighandler(int signo) {
     signal_number = signo;
     
     // page fault has to be processed inside sig_handler
-    case_page_fault();
-}
-
-void case_page_fault() {
     if(signal_number == SIGUSR1) {
-    	char *msg = "Signal recieved(SIGUSR1): Processing Pagefault\n";
-    	noticed(msg);
-    	page_fault();
+        char *msg = "Signal recieved(SIGUSR1): Processing Pagefault\n";
+        noticed(msg);
+        page_fault();
     }
 }
 
@@ -201,7 +196,7 @@ void noticed(char *msg) {
 
 int find_frame(){
     int frame = VOID_IDX;
-    if(!frames_are_occupied()) {
+    if( vmem->adm.size < VMEM_NFRAMES ) {
     	frame = vmem->adm.size;
     	vmem->adm.size += 1;
 
@@ -260,9 +255,8 @@ int start_clock() {
     	int alloc_idx = vmem->adm.next_alloc_idx;
     	int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
     	int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
-    	int is_frame_flag_used = (flags & PTF_USEDBIT1) == PTF_USEDBIT1;
     	
-    	if(is_frame_flag_used) {
+    	if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
     	    vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT1;
     	    rotate_alloc_idx();
     	} else {
@@ -306,12 +300,11 @@ int start_clock2() {
     	int alloc_idx = vmem->adm.next_alloc_idx;
     	int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
     	int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
-    	int is_frame_flag_used = (flags & PTF_USEDBIT1) == PTF_USEDBIT1;
     	
     	// if the first USED bit is set, then either delete
     	// the second used bit or the first used bit.
     	// else use this frame
-    	if(is_frame_flag_used) {
+    	if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
     	    int is_second_frame_flag_used = (flags & PTF_USEDBIT2) == PTF_USEDBIT2;
     	    
     	    // if the second USED bit is also set,
@@ -345,39 +338,25 @@ void update_pt(int frame){
     fprintf(stderr, "Update Table: Oldpage: %d OldFrame: %d\n", oldpage, frame);
 #endif
 
-    update_unload(oldpage);
-    
-    // update loaded state
-    update_load(frame);
-}
-
-void update_unload(int oldpage) {
     // delete all flags
     vmem->pt.entries[oldpage].flags = 0;
-    
     // delete the reference to the frame itwas occupiding
     vmem->pt.entries[oldpage].frame = VOID_IDX;
     
-}
-
-void update_load(int frame) {
+    // update loaded state
     int req_page = vmem->adm.req_pageno;
     vmem->pt.framepage[frame] = req_page;
     vmem->pt.entries[req_page].frame = frame;
     vmem->pt.entries[req_page].flags |= PTF_PRESENT;
 }
 
-int frames_are_occupied() {
-    return (vmem->adm.size >= VMEM_NFRAMES);
-}
-
 void init_pagefile(const char *pfname) {
-    int NoOfElements = VMEM_NPAGES*VMEM_PAGESIZE;
-    int data[NoOfElements];
+    int no_elements = VMEM_NPAGES*VMEM_PAGESIZE;
+    int data[no_elements];
     
     srand(SEED_PF);
     // fill with random data. using our own rand_mod
-    for(int i=0; i < NoOfElements; i++) {
+    for(int i=0; i < no_elements; i++) {
 	   data[i] = rand() % MY_RANDOM_MOD;
     }
     
@@ -387,7 +366,7 @@ void init_pagefile(const char *pfname) {
         exit(EXIT_FAILURE);
     }
     
-    int writing_result = fwrite(data, sizeof(int), NoOfElements, pagefile);
+    int writing_result = fwrite(data, sizeof(int), no_elements, pagefile);
     if(!writing_result) {
         perror("Error creating pagefile!\n");
         exit(EXIT_FAILURE);
