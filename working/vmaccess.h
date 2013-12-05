@@ -21,17 +21,14 @@ int vmem_read(int address);
 /* Write data to "virtual" address */
 void vmem_write(int address, int data);
 
-// refactores functions for writing and eading into vmem->data
+/* Write data to a frame in a page by offset */
 void write_page(int frame, int offset, int data);
+
+/* Read out a given frame */
 int read_page(int frame, int offset);
 
-// check if connected and maybe call vm_init();
-void vm_init_if_not_ready();
+void set_used_bits(int page);
 
-void countUsed(int page);
-int calcIndexFromPageOffset(int page, int offset);
-
-// Misc. - for testing purposes
-void dump();
+int index_from_page_offset(int page, int offset);
 
 #endif
