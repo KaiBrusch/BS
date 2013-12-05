@@ -4,6 +4,7 @@
 
 struct vmem_struct *vmem = NULL;
 
+/* Virtual Memory */
 void vm_init(){
     // connect to shared memory
     int shm_file_descriptor = shm_open(SHMKEY, O_RDWR, S_IRUSR | S_IWUSR); 
@@ -30,14 +31,14 @@ void vm_init(){
     }
 #endif
 
-    // make shared memory with the variable vmem accissible
+    // make shared memory with the variable vmem accessible
     vmem = mmap(NULL, 
                 sizeof(struct vmem_struct), 
                 PROT_READ | PROT_WRITE, 
                 MAP_SHARED, 
                 shm_file_descriptor, 
                 0);
-    
+
     if(!vmem) {
         perror("mapping into vmem failed!\n");
         exit(EXIT_FAILURE);
@@ -78,26 +79,6 @@ int vmem_read(int address) {
     return result;
 }
 
-int read_page(int page, int offset) {	
-    set_used_bits(page);
-    int index = index_from_page_offset(page, offset);
-    return vmem->data[index];
-}
-
-int index_from_page_offset(int page, int offset) {
-    return (vmem->pt.entries[page].frame*VMEM_PAGESIZE) + offset;
-}
-
-void set_used_bits(int page) {
-    int used_bit1_is_set = (vmem->pt.entries[page].flags & PTF_USEDBIT1) == PTF_USEDBIT1;
-    if(used_bit1_is_set) {
-        // then set the second usedbit
-        vmem->pt.entries[page].flags |= PTF_USEDBIT2;
-    }
-
-    vmem->pt.entries[page].flags |= PTF_USEDBIT1;
-}
-
 void vmem_write(int address, int data) {
     if(vmem == NULL) {
         vm_init();
@@ -115,11 +96,21 @@ void vmem_write(int address, int data) {
     int is_page_loaded = ((flags & PTF_PRESENT) == PTF_PRESENT);
     
     if (!is_page_loaded) {
-	   kill(vmem->adm.mmanage_pid, SIGUSR1);
-	   sem_wait(&vmem->adm.sema);
+       kill(vmem->adm.mmanage_pid, SIGUSR1);
+       sem_wait(&vmem->adm.sema);
     }
     
     write_page(page, offset, data);
+}
+/* End Virtual Memory */
+
+
+
+/* Page Functions */
+int read_page(int page, int offset) {	
+    set_used_bits(page);
+    int index = index_from_page_offset(page, offset);
+    return vmem->data[index];
 }
 
 void write_page(int page, int offset, int data) {
@@ -131,4 +122,22 @@ void write_page(int page, int offset, int data) {
     
     int index = index_from_page_offset(page, offset);
     vmem->data[index] = data;
+}
+/* End Page Functions */
+
+
+
+/* Helper Functions */
+int index_from_page_offset(int page, int offset) {
+    return (vmem->pt.entries[page].frame*VMEM_PAGESIZE) + offset;
+}
+
+void set_used_bits(int page) {
+    int used_bit1_is_set = (vmem->pt.entries[page].flags & PTF_USEDBIT1) == PTF_USEDBIT1;
+    if(used_bit1_is_set) {
+        // then set the second usedbit
+        vmem->pt.entries[page].flags |= PTF_USEDBIT2;
+    }
+
+    vmem->pt.entries[page].flags |= PTF_USEDBIT1;
 }
