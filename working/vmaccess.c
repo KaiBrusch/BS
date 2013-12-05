@@ -1,9 +1,7 @@
-// File for vmaccess.c
-// This file gives vmappl.c the access to the virtual memory
+
 
 #include "vmaccess.h"
 
-// shared memory variable
 struct vmem_struct *vmem = NULL;
 
 
@@ -28,7 +26,7 @@ void vm_init(){
         DEBUG(fprintf(stderr, "shm_open succeeded.\n"));
     }
     
-    // Groesse des gesharten Memory setzten
+    // set size of shared memory
     if( ftruncate(fd, sizeof(struct vmem_struct)) == -1) {
         perror("ftruncate failed! Make sure ./mmanage is running!\n");
         exit(EXIT_FAILURE);
@@ -37,7 +35,7 @@ void vm_init(){
         DEBUG(fprintf(stderr, "ftruncate succeeded.\n"));
     }
 
-    // mach den Shared Memory unter vmem verfuegbar
+    // make shared memory with the variable vmem accissible
     vmem = mmap(NULL, sizeof(struct vmem_struct), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if(!vmem) {
         perror("mapping into vmem failed!\n");
@@ -49,74 +47,62 @@ void vm_init(){
 }
 
 int vmem_read(int address) {
-    if(vmem == NULL) {
-        vm_init();
-    }
+    vm_init_if_not_ready();
     
     int result;
-    // page und offset berechnen.
+    
+    // calculate page and offset
     int page = address / VMEM_PAGESIZE;
     int offset = address % VMEM_PAGESIZE;
 
-    // verwendete page vermerken
-    // damit im Falle eines Pagefaults
-    // mmanage diese Page laden kann
+    // mark request for the case of a page fault
     vmem->adm.req_pageno = page;
-    
-    sem_wait(&vmem->adm.sema);
-    
     
     int flags = vmem->pt.entries[page].flags;
     // check whether the page is currently loaded
     int req_page_is_loaded = ((flags & PTF_PRESENT) == PTF_PRESENT);
     
     if (!req_page_is_loaded) {
+	// DEBUG(fprintf(stderr, "Pagefult for reading!\n"));
 	kill(vmem->adm.mmanage_pid, SIGUSR1);
 	sem_wait(&vmem->adm.sema);
     }
     
     result = read_page(page, offset);
     
-    sem_post(&vmem->adm.sema);
-    
     return result;
 }
 
 int read_page(int page, int offset) {	
-    count_used(page);
-    int index = calc_index_from_poffset(page, offset);
+    countUsed(page);
+    int index = calcIndexFromPageOffset(page, offset);
+    // DEBUG(fprintf(stderr, "Reading: Page: %d Offset: %d\n", page, offset));
     return vmem->data[index];
 }
 
-int calc_index_from_poffset(int page, int offset) {
+int calcIndexFromPageOffset(int page, int offset) {
     return (vmem->pt.entries[page].frame*VMEM_PAGESIZE) + offset;
 }
 
-void count_used(int page) {
+void countUsed(int page) {
     // if USED bit 1 is already set, then set the second used bit.
-    int used_1_is_set = vmem->pt.entries[page].flags & PTF_USED;
+    int used_1_is_set = (vmem->pt.entries[page].flags & PTF_USEDBIT1) == PTF_USEDBIT1;
     if(used_1_is_set) {
-	vmem->pt.entries[page].flags |= PTF_USED1;
+	vmem->pt.entries[page].flags |= PTF_USEDBIT2;
     }
     // the first used bit is always set
-    vmem->pt.entries[page].flags |= PTF_USED;
+    vmem->pt.entries[page].flags |= PTF_USEDBIT1;
 }
 
 void vmem_write(int address, int data) {
-    if(vmem == NULL) {
-        vm_init();
-    }
-
-    // page und offset berechnen.
+    vm_init_if_not_ready();
+    
+    // calculate page and offset
     int page = address / VMEM_PAGESIZE;
     int offset = address % VMEM_PAGESIZE;
     
-    // verwendete page vermerken
-    // damit im Falle eines Pagefaults
-    // mmanage diese Page laden kann
+    // mark request for the case of a page fault
     vmem->adm.req_pageno = page;
-    
-    sem_wait(&vmem->adm.sema); // <- thanks @ eine andere gruppe
     
     int flags = vmem->pt.entries[page].flags;
     // check whether the page is currently loaded
@@ -129,20 +115,25 @@ void vmem_write(int address, int data) {
     }
     
     write_page(page, offset, data);
-    
-    sem_post(&vmem->adm.sema); // <- thanks @ eine andere gruppe
 }
 
 void write_page(int page, int offset, int data) {
-    count_used(page);
+    countUsed(page);
     
     // mark the change and to make sure it'll be updated
     // into the pagefile.bin
-    vmem->pt.entries[page].flags |= PTF_DIRTY;
+    vmem->pt.entries[page].flags |= PTF_CHANGED;
     
-    int index = calc_index_from_poffset(page, offset);
+    int index = calcIndexFromPageOffset(page, offset);
     // DEBUG(fprintf(stderr, "Write: Page: %d Offset: %d Data: %d\n", page, offset, data));
     vmem->data[index] = data;
+}
+
+
+void vm_init_if_not_ready() {
+    if(vmem == NULL) {
+        vm_init();
+    }
 }
 
 void dump() {

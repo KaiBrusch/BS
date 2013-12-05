@@ -1,7 +1,6 @@
 /* Header file for vmappl.c
  * File: vmappl.h
  * Prof. Dr. Wolfgang Fohl, HAW Hamburg
- * 2010
  */
 
 #ifndef VMACCESS_H
@@ -24,12 +23,13 @@ void vmem_write(int address, int data);
 
 // refactores functions for writing and eading into vmem->data
 void write_page(int frame, int offset, int data);
-
 int read_page(int frame, int offset);
 
-void count_used(int page);
+// check if connected and maybe call vm_init();
+void vm_init_if_not_ready();
 
-int calc_index_from_poffset(int page, int offset);
+void countUsed(int page);
+int calcIndexFromPageOffset(int page, int offset);
 
 // Misc. - for testing purposes
 void dump();

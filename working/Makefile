@@ -1,11 +1,11 @@
 CC=/usr/bin/gcc
 CCFLAGS := -Wall -std=c99 -pthread
 LDFLAGS := -lpthread
-LRT := -lrt # lrt -> for shared memory open
-SOURCE_FLAGS := -D_XOPEN_SOURCE=600 #need because ipc.h requires functions from XOPEN_SOURCE library
+LRT := -lrt
+SOURCE_FLAGS := -D_XOPEN_SOURCE=600 # some libreries requier open source
 
-#CCFLAGS += -DFIFO
-CCFLAGS += -DCLOCK
+CCFLAGS += -DFIFO
+#CCFLAGS += -DCLOCK
 #CCFLAGS += -DCLOCK2
 
 #CCFLAGS += -DDEBUG_MESSAGES

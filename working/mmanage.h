@@ -17,9 +17,7 @@
 
 
 /** Event struct for logging */
-// Die zu loggenden Daten werden jedesmal
-// hier reingeschrieben bevordie
-// loggerfunktion aufgerufen wird.
+// struct for the logging event
 struct logevent {
     int req_pageno;
     int replaced_page;
@@ -49,14 +47,15 @@ int find_remove_frame(void);
 
 int use_algorithm(void);
 
-int fifo(void);
+int find_remove_fifo(void);
 
-int mclock(void);
+int find_remove_clock(void);
 
-int mclock2(void);
+int find_remove_clock2(void);
 
 void signal_proccessing_loop(void);
 
+// checks if a SIGUSR1 was caught and calls page_fault()
 void case_page_fault(void);
 
 // opens pagefile and maybe fills
@@ -69,39 +68,50 @@ void open_logfile();
 // the process is ending
 void cleanup();
 
+// returns whether all frames are already occupied
+int frames_are_occupied();
+
 // log everthing given in this logevent
 void logger(struct logevent le);
-
 
 // print debug statement that we noticed a
 // signal and reset signal number
 void noticed(char *msg);
 
 void update_load(int frame);
-
 void update_unload(int oldpage);
 
 void page_fault();
 
-void increment_alloc_idx(int alloc_idx);
+void rotate_alloc_idx();
 
 void dump_vmem_structure();
-
-
 
 /* Misc */
 #define MMANAGE_PFNAME "./pagefile.bin" /**< pagefile name */
 #define MMANAGE_LOGFNAME "./logfile.txt"        /**< logfile name */
 
-#define VMEM_ALGO_FIFO  0
-#define VMEM_ALGO_CLOCK 1
-#define VMEM_ALGO_CLOCK2 2
-
 #define MY_RANDOM_MOD 123
 
-#define SEED_PF 290913        /**< Get reproducable pseudo-random numbers for
+#ifdef FIFO
+#define ALGO_STR "FIFO"
+#endif
+
+#ifdef CLOCK
+#define ALGO_STR "CLOCK"
+#endif
+
+#ifdef CLOCK2
+#define ALGO_STR "CLOCK2"
+#endif
+
+#define SEED_PF 123456        /**< Get reproducable pseudo-random numbers for
                            init_pagefile */
 
 #define VOID_IDX -1
+
+/* Edit to modify algo, or remove line and provide
+ * -DVMEM_ALGO ... compiler flag*/
+/* #define VMEM_ALGO VMEM_ALGO_FIFO */
 
 #endif /* MMANAGE_H */
