@@ -56,7 +56,7 @@ int start_clock2(void);
 /* Signals */
 void sighandler(int signo);
 
-void signal_proccessing_loop(void);
+void signal_loop(void);
 
 
 /* Physical Memory */
@@ -70,19 +70,19 @@ void page_fault();
 /* Administrative Procedures */
 #define LOGFILE "./logfile.txt"        /**< logfile name */
 
-void cleanup();
+void on_programm_finished();
 
 void logger(struct logevent le);
 
 void open_logfile();
 
-void dump_vmem_structure();
+void print_vmem();
 
 
 /* Random & Misc */
 #define SEED_PF 123456        
 
-#define VOID_IDX -1
+#define DUMMY_TAG -1
 
 
 #endif /* MMANAGE_H */

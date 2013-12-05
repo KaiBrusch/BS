@@ -12,8 +12,6 @@
  * This process is initiating the shared memory, so
  * it has to be started prior to the vmaccess process
  *
- * TODO:
-
  * */
 
 #include "mmanage.h"
@@ -21,8 +19,8 @@
 struct vmem_struct *vmem = NULL;
 FILE *pagefile = NULL;
 FILE *logfile = NULL;
-int signal_number = 0;
 
+int signal_number = 0;
 int shm_file_descriptor;
 
 /* Main section */
@@ -74,7 +72,7 @@ int main(void){
     }
 #endif
 
-    signal_proccessing_loop();
+    signal_loop();
 
     exit(EXIT_SUCCESS);
 }
@@ -83,13 +81,25 @@ int main(void){
 
 
 /* Signal Processing Section */
-void signal_proccessing_loop() {
+void signal_loop() {
     fprintf(stderr, "UPDATE: Memory Manager is at pid(%d).\n", getpid());
 
     while(1) {
 
     	signal_number = 0;
     	pause();
+
+        if(signal_number == SIGINT) {
+
+#ifdef DEBUG_MESSAGES
+           fprintf(stderr, "UPDATE: Signal recieved(SIGINT) for quitting\n");
+#endif
+
+           signal_number = 0;
+           on_programm_finished();
+           break;
+
+        }
 
     	if(signal_number == SIGUSR2) {
 
@@ -98,16 +108,8 @@ void signal_proccessing_loop() {
 #endif
 
            signal_number = 0;
-           dump_vmem_structure();
-    	} else if(signal_number == SIGINT) {
+           print_vmem();
 
-#ifdef DEBUG_MESSAGES
-           fprintf(stderr, "UPDATE: Signal recieved(SIGINT) for quitting\n");
-#endif
-
-           signal_number = 0;
-    	   cleanup();
-    	   break;
     	}
     }
 }
@@ -128,8 +130,8 @@ void sighandler(int signo) {
 }
 
 void page_fault() {
-    int new_page = VOID_IDX;
-    int new_frame = VOID_IDX;
+    int new_page = DUMMY_TAG;
+    int new_frame = DUMMY_TAG;
     int req_page = vmem->adm.req_pageno;
 
     // page fault debug message for log
@@ -176,7 +178,7 @@ void page_fault() {
     contains: fifo, clock and clock 2 algorithms */
 
 int find_frame(){
-    int frame = VOID_IDX;
+    int frame = DUMMY_TAG;
     if( vmem->adm.size < VMEM_NFRAMES ) {
         frame = vmem->adm.size;
         vmem->adm.size += 1;
@@ -194,7 +196,7 @@ int find_frame(){
 
     }
 
-    if(frame == VOID_IDX) {
+    if(frame == DUMMY_TAG) {
 
 #ifdef DEBUG_MESSAGES
        fprintf(stderr, "ATTENTION: FAIL, returned Frame is -1");
@@ -225,9 +227,9 @@ int start_fifo() {
 
 //clock
 int start_clock() {
-    int frame = VOID_IDX;
+    int frame = DUMMY_TAG;
 
-    while( frame == VOID_IDX ) {
+    while( frame == DUMMY_TAG ) {
         int alloc_idx = vmem->adm.next_alloc_idx;
         int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
         int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
@@ -250,9 +252,9 @@ int start_clock() {
 // if the first USED bit is set, delete the second
 // if the second was not deleted, delete the first one
 int start_clock2() {
-    int frame = VOID_IDX;
+    int frame = DUMMY_TAG;
 
-    while( frame == VOID_IDX ) {
+    while( frame == DUMMY_TAG ) {
     	int alloc_idx = vmem->adm.next_alloc_idx;
     	int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
     	int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
@@ -321,7 +323,7 @@ void update_pagetable(int frame){
     // setting a flag to 0 will delete the flag
     vmem->pt.entries[oldpage].flags = 0;
     // after deleting the flag we need to also delete the reference
-    vmem->pt.entries[oldpage].frame = VOID_IDX;
+    vmem->pt.entries[oldpage].frame = DUMMY_TAG;
 
     // after deleting the reference we have to update the state
     int req_page = vmem->adm.req_pageno;
@@ -405,23 +407,23 @@ void init_pagetable_framepage_data(){
     // pagetable for loop
     for(int i = 0; i < VMEM_NPAGES; i++) {
         vmem->pt.entries[i].flags = 0;
-        vmem->pt.entries[i].frame = VOID_IDX;
+        vmem->pt.entries[i].frame = DUMMY_TAG;
     }
     // framepage for loop
     for(int i = 0; i < VMEM_NFRAMES; i++) {
-       vmem->pt.framepage[i] = VOID_IDX;
+       vmem->pt.framepage[i] = DUMMY_TAG;
     }
     // data for loop
     for(int i = 0; i < (VMEM_NFRAMES * VMEM_PAGESIZE); i++) {
-       vmem->data[i] = VOID_IDX;
+       vmem->data[i] = DUMMY_TAG;
     }
 }
 
 void vmem_init_null_data(){
     vmem->adm.size = 0;
     vmem->adm.mmanage_pid = getpid();
-    vmem->adm.shm_id = VOID_IDX;
-    vmem->adm.req_pageno = VOID_IDX;
+    vmem->adm.shm_id = DUMMY_TAG;
+    vmem->adm.req_pageno = DUMMY_TAG;
     vmem->adm.next_alloc_idx = 0;
     vmem->adm.pf_count = 0;
 }
@@ -430,19 +432,19 @@ void vmem_init_null_data(){
 
 
 /* Administrative Functions Section */
-void dump_vmem_structure() {
-    fprintf(stderr, "___ DUMPING VMEM ___\n");
-    fprintf(stderr, "Administrative Structures:\n");
-    fprintf(stderr, "Filled: %d, Next_request: %d pf_count: %d Next_alloc_idx: %d\n",
-        vmem->adm.size, vmem->adm.req_pageno, vmem->adm.pf_count, vmem->adm.next_alloc_idx);
-    fprintf(stderr, " ___ DATA IN VMEM ___\n");
-    fprintf(stderr, "(index, data)\n");
+void print_vmem() {
+    fprintf(stderr, "< adm_struct >\n");
+    fprintf(stderr, "size: %d, pf_count: %d, 
+        req_pageno: %d, next_alloc_idx: %d\n",
+        vmem->adm.size, vmem->adm.req_pageno, 
+        vmem->adm.pf_count, vmem->adm.next_alloc_idx);
+    fprintf(stderr, "< data >\n");
     for(int i = 0; i < (VMEM_NFRAMES * VMEM_PAGESIZE); i++) {
-       fprintf(stderr, "(%d, %d) \n", i, vmem->data[i]);
+       fprintf(stderr, "%d \n", vmem->data[i]);
     }
 }
 
-void cleanup(){
+void on_programm_finished(){
     // delete shared memory
     munmap(vmem, SHMSIZE);
     close(shm_file_descriptor);
