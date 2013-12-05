@@ -368,6 +368,34 @@ void vmem_init(){
 
 }
 
+void init_pagefile() {
+    int no_elements = VMEM_NPAGES*VMEM_PAGESIZE;
+    int data[no_elements];
+    
+    srand(SEED_PF);
+    // fill with random data. using our own rand_mod
+    for(int i=0; i < no_elements; i++) {
+        data[i] = rand() % 1000;
+    }
+
+    pagefile = fopen(PAGEFILE, "w+b");
+    if(!pagefile) {
+        perror("Error creating pagefile!\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    int write_to_page = fwrite(data, sizeof(int), no_elements, pagefile);
+    if(!write_to_page) {
+        perror("Error creating pagefile!\n");
+        exit(EXIT_FAILURE);
+    }
+
+#ifdef DEBUG_MESSAGES
+    fprintf(stderr, "Pagefile created.\n");
+#endif
+
+}
+
 void init_pagetable_framepage_data(){
     // pagetable
     for(int i = 0; i < VMEM_NPAGES; i++) {
