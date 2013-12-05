@@ -25,9 +25,8 @@ int signal_number = 0;
 
 int shm_file_descriptor;
 
-int
- main(void)
-{
+/* MAIN */
+int main(void){
     
     struct sigaction sigact;
 
@@ -79,7 +78,11 @@ int
     
     exit(EXIT_SUCCESS);
 }
+/* End Main */
 
+
+
+/* Signal Processing */
 void signal_proccessing_loop() {
     fprintf(stderr, "Memory Manager at pid(%d).\n", getpid());
 
@@ -109,48 +112,6 @@ void signal_proccessing_loop() {
     }
 }
 
-void page_fault() {
-    int page_unloaded = VOID_IDX;
-    int new_frame = VOID_IDX;
-    int req_page = vmem->adm.req_pageno;
-
-#ifdef DEBUG_MESSAGES
-    fprintf(stderr, "\n<=== Pagefault ===>\n");
-    // A Pagefault has occured
-    fprintf(stderr, "Requested Page: %d\n", req_page);
-#endif  
-
-    vmem->adm.pf_count++;
-    
-    new_frame = find_frame();
-    
-    page_unloaded = vmem->pt.framepage[new_frame];
-    
-    if( vmem->adm.size >= VMEM_NFRAMES ) {
-	   store_page(page_unloaded);
-    }
-    update_pt(new_frame);
-    
-    fetch_page(req_page);
-    
-    
-    // make Logs
-    struct logevent le;
-    le.req_pageno = vmem->adm.req_pageno;
-    le.replaced_page = page_unloaded;
-    le.alloc_frame = new_frame;
-    le.pf_count = vmem->adm.pf_count;
-    le.g_count = 0;
-    logger(le);
-
-#ifdef DEBUG_MESSAGES
-    fprintf(stderr, "Page loaded. pf_count: %d\n", vmem->adm.pf_count);
-#endif  
-
-    // free the calling process
-    sem_post(&vmem->adm.sema);
-}
-
 void sighandler(int signo) {
     signal_number = signo;
     
@@ -166,46 +127,68 @@ void sighandler(int signo) {
     }
 }
 
-void dump_vmem_structure() {
-    fprintf(stderr, " <========== DUMP OF VMEM =========> \n");
-    fprintf(stderr, "Administrative Structures:\n");
-    fprintf(stderr, "Filled: %d, Next_request: %d pf_count: %d Next_alloc_idx: %d\n",
-	    vmem->adm.size, vmem->adm.req_pageno, vmem->adm.pf_count, vmem->adm.next_alloc_idx);
-    fprintf(stderr, " <========== Data in vmem =========> \n");
-    fprintf(stderr, "(index, data)\n");
-    for(int i = 0; i < (VMEM_NFRAMES * VMEM_PAGESIZE); i++) {
-	   fprintf(stderr, "(%d, %d) \n", i, vmem->data[i]);
+void page_fault() {
+    int new_page = VOID_IDX;
+    int new_frame = VOID_IDX;
+    int req_page = vmem->adm.req_pageno;
+
+#ifdef DEBUG_MESSAGES
+    fprintf(stderr, "\n<=== Pagefault ===>\n");
+    // A Pagefault has occured
+    fprintf(stderr, "Requested Page: %d\n", req_page);
+#endif  
+
+    vmem->adm.pf_count++;
+    
+    new_frame = find_frame();
+    
+    new_page = vmem->pt.framepage[new_frame];
+    
+    if( vmem->adm.size >= VMEM_NFRAMES ) {
+	   store_page(new_page);
     }
-}
 
-void cleanup(){
-    // delete shared memory
-    munmap(vmem, SHMSIZE);
-    close(shm_file_descriptor);
-    shm_unlink(SHMKEY);
+    update_pagetable(new_frame);
     
-    // close files
-    fclose(logfile);
-    fclose(pagefile);
+    fetch_page(req_page);
     
-    printf("Quit!\n");
-}
+    
+    // make Logs
+    struct logevent le;
+    le.req_pageno = vmem->adm.req_pageno;
+    le.replaced_page = new_page;
+    le.alloc_frame = new_frame;
+    le.pf_count = vmem->adm.pf_count;
+    le.g_count = 0;
+    logger(le);
 
+#ifdef DEBUG_MESSAGES
+    fprintf(stderr, "Page loaded. pf_count: %d\n", vmem->adm.pf_count);
+#endif  
+
+    // free the calling process
+    sem_post(&vmem->adm.sema);
+}
+/* End Signal Processing */
+
+
+
+/* Algorithms */
 int find_frame(){
     int frame = VOID_IDX;
     if( vmem->adm.size < VMEM_NFRAMES ) {
-    	frame = vmem->adm.size;
-    	vmem->adm.size += 1;
+        frame = vmem->adm.size;
+        vmem->adm.size += 1;
 
 #ifdef DEBUG_MESSAGES
-    	fprintf(stderr, "New Frame: %d (by free space)\n", frame);
+        fprintf(stderr, "New Frame: %d (by free space)\n", frame);
 #endif
 
     } else {
-	   frame = choose_algo();
+       frame = choose_algo();
 
 #ifdef DEBUG_MESSAGES
-	   fprintf(stderr, "New Frame: %d (by algorithm)\n", frame);
+       fprintf(stderr, "New Frame: %d (by algorithm)\n", frame);
 #endif
 
     }
@@ -213,10 +196,10 @@ int find_frame(){
     if(frame == VOID_IDX) {
 
 #ifdef DEBUG_MESSAGES
-	   fprintf(stderr, "<================= FAIL returned Frame is -1 ==============>\n");
+       fprintf(stderr, "<================= FAIL returned Frame is -1 ==============>\n");
 #endif
 
-	   exit(EXIT_FAILURE);
+       exit(EXIT_FAILURE);
     }
     return frame;
 }
@@ -239,55 +222,24 @@ int start_fifo() {
     return frame;
 }
 
-// rotates the pointer to the next alloc in fifo clock and clock2
-void incr_alloc_idx() {
-    vmem->adm.next_alloc_idx++;
-    vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
-}
-
 int start_clock() {
     int frame = VOID_IDX;
     
     while( frame == VOID_IDX ) {
-    	int alloc_idx = vmem->adm.next_alloc_idx;
-    	int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
-    	int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
-    	
-    	if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
-    	    vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT1;
-    	    incr_alloc_idx();
-    	} else {
-    	    frame = alloc_idx;
-    	}
+        int alloc_idx = vmem->adm.next_alloc_idx;
+        int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
+        int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
+        
+        if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
+            vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT1;
+            incr_alloc_idx();
+        } else {
+            frame = alloc_idx;
+        }
     }
     incr_alloc_idx();
     
     return frame;
-}
-
-void store_page(int page) {
-    // if the fragme wasnt changed then dont store it.
-    if( ( vmem->pt.entries[page].flags & PTF_CHANGED ) == PTF_CHANGED ) {
-    	int frame = vmem->pt.entries[page].frame;
-    	// scrool to the position to write into
-    	fseek(pagefile, sizeof(int)*VMEM_PAGESIZE*page, SEEK_SET);
-    	int written_ints = fwrite(&vmem->data[VMEM_PAGESIZE*frame], sizeof(int), VMEM_PAGESIZE, pagefile);
-    	if(written_ints != VMEM_PAGESIZE) {
-    	    perror("Not everything could be written into the page!\n");
-    	    exit(EXIT_FAILURE);
-    	}
-    }
-}
-
-void fetch_page(int page) {
-    int frame = vmem->pt.entries[page].frame;
-    // scrool to the position to read from
-    fseek(pagefile, sizeof(int)*VMEM_PAGESIZE*page, SEEK_SET);
-    int readen_ints = fread(&vmem->data[VMEM_PAGESIZE*frame], sizeof(int), VMEM_PAGESIZE, pagefile);
-    if(readen_ints != VMEM_PAGESIZE) {
-	perror("Not everything could be read!\n");
-	exit(EXIT_FAILURE);
-    }
 }
 
 int start_clock2() {
@@ -302,9 +254,7 @@ int start_clock2() {
     	// if the second was not deleted, delete the first one
         if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
     	   int is_second_frame_flag_used = (flags & PTF_USEDBIT2) == PTF_USEDBIT2;
-    	    
-    	   // if the second USED bit is also set,
-    	   // then unset it. else simply unset the first USED bit
+    	   
     	   if( is_second_frame_flag_used ) {
     	       vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT2;
     	   } else {
@@ -322,8 +272,40 @@ int start_clock2() {
     return frame;
 }
 
+void incr_alloc_idx() {
+    vmem->adm.next_alloc_idx++;
+    vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
+}
+/* End Algorithms */
 
-void update_pt(int frame){
+
+
+/* Page Table functions */
+void store_page(int page) {
+    int frame_has_changed = (vmem->pt.entries[page].flags & PTF_CHANGED) == PTF_CHANGED;
+    if(frame_has_changed) {
+        int frame = vmem->pt.entries[page].frame;
+        // find position in pagefile for current frame
+        fseek(pagefile, sizeof(int)*VMEM_PAGESIZE*page, SEEK_SET);
+        int write_to_page = fwrite(&vmem->data[VMEM_PAGESIZE*frame], sizeof(int), VMEM_PAGESIZE, pagefile);
+        if(write_to_page != VMEM_PAGESIZE) {
+            perror("Not everything could be written into the page!\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
+void fetch_page(int page) {
+    int frame = vmem->pt.entries[page].frame;
+    fseek(pagefile, sizeof(int)*VMEM_PAGESIZE*page, SEEK_SET);
+    int readen_ints = fread(&vmem->data[VMEM_PAGESIZE*frame], sizeof(int), VMEM_PAGESIZE, pagefile);
+    if(readen_ints != VMEM_PAGESIZE) {
+       perror("Not everything could be read!\n");
+       exit(EXIT_FAILURE);
+    }
+}
+
+void update_pagetable(int frame){
     // unset old page
     int oldpage = vmem->pt.framepage[frame];
 
@@ -342,49 +324,10 @@ void update_pt(int frame){
     vmem->pt.entries[req_page].frame = frame;
     vmem->pt.entries[req_page].flags |= PTF_PRESENT;
 }
-
-void init_pagefile() {
-    int no_elements = VMEM_NPAGES*VMEM_PAGESIZE;
-    int data[no_elements];
-    
-    srand(SEED_PF);
-    // fill with random data. using our own rand_mod
-    for(int i=0; i < no_elements; i++) {
-	   data[i] = rand() % 1000;
-    }
-    
-    pagefile = fopen(PAGEFILE, "w+b");
-    if(!pagefile) {
-        perror("Error creating pagefile!\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    int write_to_page = fwrite(data, sizeof(int), no_elements, pagefile);
-    if(!write_to_page) {
-        perror("Error creating pagefile!\n");
-        exit(EXIT_FAILURE);
-    }
-
-#ifdef DEBUG_MESSAGES
-    fprintf(stderr, "Pagefile created.\n");
-#endif
-
-}
-
-void open_logfile(){
-    logfile = fopen(LOGFILE, "w");
-    if(!logfile) {
-        perror("Error creating logfile!\n");
-        exit(EXIT_FAILURE);
-    }
-
-#ifdef DEBUG_MESSAGES
-    fprintf(stderr, "Logfile created.\n");
-#endif
-
-}
+/* End Page Table functions */
 
 
+/* Initialization */
 void vmem_init(){
 
     shm_file_descriptor = shm_open(SHMKEY, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
@@ -425,8 +368,6 @@ void vmem_init(){
 
 }
 
-
-// Initialization
 void init_pagetable_framepage_data(){
     // pagetable
     for(int i = 0; i < VMEM_NPAGES; i++) {
@@ -451,7 +392,52 @@ void vmem_init_null_data(){
     vmem->adm.next_alloc_idx = 0;
     vmem->adm.pf_count = 0;
 }
+/* End Initialization */
 
+
+
+/* Administrative Functions */
+void dump_vmem_structure() {
+    fprintf(stderr, " <========== DUMP OF VMEM =========> \n");
+    fprintf(stderr, "Administrative Structures:\n");
+    fprintf(stderr, "Filled: %d, Next_request: %d pf_count: %d Next_alloc_idx: %d\n",
+        vmem->adm.size, vmem->adm.req_pageno, vmem->adm.pf_count, vmem->adm.next_alloc_idx);
+    fprintf(stderr, " <========== Data in vmem =========> \n");
+    fprintf(stderr, "(index, data)\n");
+    for(int i = 0; i < (VMEM_NFRAMES * VMEM_PAGESIZE); i++) {
+       fprintf(stderr, "(%d, %d) \n", i, vmem->data[i]);
+    }
+}
+
+void cleanup(){
+    // delete shared memory
+    munmap(vmem, SHMSIZE);
+    close(shm_file_descriptor);
+    shm_unlink(SHMKEY);
+    
+    // close files
+    fclose(logfile);
+    fclose(pagefile);
+    
+    printf("Over and Out!\n");
+}
+/* End Administrative Functions */
+
+
+
+/* Logging */
+void open_logfile(){
+    logfile = fopen(LOGFILE, "w");
+    if(!logfile) {
+        perror("Error creating logfile!\n");
+        exit(EXIT_FAILURE);
+    }
+
+#ifdef DEBUG_MESSAGES
+    fprintf(stderr, "Logfile created.\n");
+#endif
+
+}
 
 /* Do not change!  */
 void

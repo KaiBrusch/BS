@@ -32,7 +32,7 @@ void fetch_page(int pt_idx);
 
 void store_page(int pt_idx);
 
-void update_pt(int frame);
+void update_pagetable(int frame);
 
 void vmem_init_null_data();
 
