@@ -439,7 +439,8 @@ void print_vmem() {
     fprintf(stderr, "req_pageno: %d, next_alloc_idx: %d\n",
         vmem->adm.pf_count, vmem->adm.next_alloc_idx); 
     fprintf(stderr, "< data >\n");
-    for(int i = 0; i < (VMEM_NFRAMES * VMEM_PAGESIZE); i++) {
+    int total_frame_count = VMEM_NFRAMES * VMEM_PAGESIZE;
+    for(int i = 0; i < total_frame_count; i++) {
        fprintf(stderr, "%d \n", vmem->data[i]);
     }
 }
