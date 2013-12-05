@@ -137,7 +137,7 @@ void page_fault() {
     // page fault debug message for log
 #ifdef DEBUG_MESSAGES
     fprintf(stderr, "\n ATTENTION: Pagefault Occured \n");
-    fprintf(stderr, "Requested Page: %d\n", req_page);
+    fprintf(stderr, "UPDATE: Requested Page: %d\n", req_page);
 #endif
 
     vmem->adm.pf_count++;
@@ -184,14 +184,14 @@ int find_frame(){
         vmem->adm.size += 1;
 
 #ifdef DEBUG_MESSAGES
-        fprintf(stderr, "UPDATE: New Frame: %d (by free space)\n", frame);
+        fprintf(stderr, "UPDATE: New Frame: %d with free space\n", frame);
 #endif
 
     } else {
        frame = choose_algo();
 
 #ifdef DEBUG_MESSAGES
-       fprintf(stderr, "UPDATE: New Frame: %d (by algorithm)\n", frame);
+       fprintf(stderr, "UPDATE: New Frame: %d with algorithm\n", frame);
 #endif
 
     }
