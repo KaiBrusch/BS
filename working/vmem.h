@@ -93,4 +93,5 @@ struct vmem_struct {
 // Size of the shared memory for initialization
 #define SHMSIZE (sizeof(struct vmem_struct))
 
+#define DUMMY_TAG -1
 #endif /* VMEM_H */

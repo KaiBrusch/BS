@@ -52,8 +52,6 @@ void init_pagefile();
 
 void page_fault();
 
-extern int find_frame(void);
-
 /* Administrative Procedures */
 #define LOGFILE "./logfile.txt"        /**< logfile name */
 
@@ -69,7 +67,8 @@ void print_vmem();
 /* Random & Misc */
 #define SEED_PF 123456        
 
-#define DUMMY_TAG -1
 
+/* Algorithms */
+int find_frame(void);
 
 #endif /* MMANAGE_H */

@@ -1,8 +1,14 @@
 
-#include "algorithms.h"
+#include "vmem.h"
 
-/*  Algorithm
-    contains: fifo, clock and clock2 algorithm */
+extern struct vmem_struct *vmem;
+
+int start_fifo(void);
+
+int start_clock(void);
+
+int start_clock2(void);
+
 
 int find_frame(){
 

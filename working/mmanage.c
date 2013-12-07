@@ -15,14 +15,12 @@
  * */
 
 #include "mmanage.h"
-#include "algorithms.h"
 
 FILE *pagefile = NULL;
 FILE *logfile = NULL;
 struct vmem_struct *vmem = NULL;
 
 int signal_number = 0;
-
 
 
 /* Main */

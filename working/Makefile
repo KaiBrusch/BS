@@ -21,13 +21,13 @@ vmaccess.o: vmaccess.c vmaccess.h
 vmappl: vmaccess.o vmappl.o
 	$(CC) $(LDFLAGS) -o vmappl vmaccess.o vmappl.o $(LRT)
 
-mmanage.o: mmanage.c mmanage.h
+mmanage.o: mmanage.c mmanage.h 
 	$(CC) $(CCFLAGS) $(SOURCE_FLAGS) -c -o mmanage.o mmanage.c $(LRT)
 
-mmanage: mmanage.o
-	$(CC) $(LDFLAGS) -o mmanage mmanage.o $(LRT)
+mmanage: mmanage.o  algorithms.o
+	$(CC) $(LDFLAGS) -o mmanage mmanage.o algorithms.o $(LRT)
 
-algorithms.o: algorithms.c algorithms.h
+algorithms.o: algorithms.c
 	$(CC) $(CCFLAGS) $(SOURCE_FLAGS) -c -o algorithms.o algorithms.c $(LRT)
 
 clean:
