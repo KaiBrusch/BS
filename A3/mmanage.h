@@ -1,13 +1,20 @@
-/** Definitions for virtual memory management model
+/* Definitions for virtual memory management model
  * File: mmanage.h
  *
  * Prof. Dr. Wolfgang Fohl, HAW Hamburg
- * 2013
+ * 2010
  */
 #ifndef MMANAGE_H
 #define MMANAGE_H
 #include "vmem.h"
 #include <limits.h>
+
+// for connection to shared memory
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+
 
 /** Event struct for logging */
 struct logevent {
@@ -18,55 +25,50 @@ struct logevent {
     int g_count;
 };
 
-/** Prototypes */
-void sighandler(int signo);
-
-void vmem_init(void);
-
-void allocate_page(void);
+/* Virtual Memory */
+void vmem_init(int shm_file_descriptor);
 
 void fetch_page(int pt_idx);
 
 void store_page(int pt_idx);
 
-void update_pt(int frame);
+void update_pagetable(int frame);
 
-int find_remove_frame(void);
+void vmem_init_null_data();
 
-int find_remove_fifo(void);
+void init_pagetable_framepage_data();
 
-int find_remove_clock(void);
 
-int find_remove_clock2(void);
+/* Signals */
+void sighandler(int signo);
 
-int search_bitmap(void);
+void signal_loop(int shm_file_descriptor);
 
-int find_free_bit(Bmword bmword, Bmword mask);
 
-void init_pagefile(const char *pfname);
+/* Physical Memory */
+#define PAGEFILE "./pagefile.bin"		/**< pagefile name */
 
-void cleanup(void);
+void init_pagefile();
+
+void page_fault();
+
+/* Administrative Procedures */
+#define LOGFILE "./logfile.txt"        /**< logfile name */
+
+void on_programm_finished(int shm_file_descriptor);
 
 void logger(struct logevent le);
 
-void dump_pt(void);
+void open_logfile();
 
-/** Misc */
-#define MMANAGE_PFNAME "./pagefile.bin" /**< pagefile name */
-#define MMANAGE_LOGFNAME "./logfile.txt"        /**< logfile name */
+void print_vmem();
 
-#define VMEM_ALGO_FIFO  0
-#define VMEM_ALGO_LRU   1
-#define VMEM_ALGO_CLOCK 2
-#define VMEM_ALGO_CLOCK2 3
 
-#define SEED_PF 290913        /**< Get reproducable pseudo-random numbers for
-                           init_pagefile */
+/* Random & Misc */
+#define SEED_PF 123456        
 
-#define VOID_IDX -1
 
-/* Edit to modify algo, or remove line and provide
- * -DVMEM_ALGO ... compiler flag*/
-/* #define VMEM_ALGO VMEM_ALGO_FIFO */
+/* Algorithms */
+int find_frame(void);
 
 #endif /* MMANAGE_H */
