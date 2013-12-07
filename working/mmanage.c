@@ -16,23 +16,27 @@
 
 #include "mmanage.h"
 
-struct vmem_struct *vmem = NULL;
+
 FILE *pagefile = NULL;
 FILE *logfile = NULL;
+struct vmem_struct *vmem = NULL;
 
 int signal_number = 0;
-int shm_file_descriptor;
 
-/* Main section */
+
+
+/* Main */
 int main(void){
 
     struct sigaction sigact;
+    int shm_file_descriptor = shm_open(SHMKEY, 
+        O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 
     init_pagefile();
 
     open_logfile();
 
-    vmem_init();
+    vmem_init(shm_file_descriptor);
 
     // initializing signal handler
     // installing the signal handler for SIGUSR1
@@ -72,16 +76,16 @@ int main(void){
     }
 #endif
 
-    signal_loop();
+    signal_loop(shm_file_descriptor);
 
     exit(EXIT_SUCCESS);
 }
-/* End Main Section */
+/* End Main */
 
 
 
-/* Signal Processing Section */
-void signal_loop() {
+/* Signal Processing */
+void signal_loop(int shm_file_descriptor) {
     fprintf(stderr, "UPDATE: Memory Manager is at pid(%d).\n", getpid());
 
     while(1) {
@@ -96,7 +100,7 @@ void signal_loop() {
 #endif
 
            signal_number = 0;
-           on_programm_finished();
+           on_programm_finished(shm_file_descriptor);
            break;
 
         }
@@ -146,7 +150,7 @@ void page_fault() {
 
     new_page = vmem->pt.framepage[new_frame];
 
-    if( vmem->adm.size >= VMEM_NFRAMES ) {
+    if(vmem->adm.size >= VMEM_NFRAMES) {
 	   store_page(new_page);
     }
 
@@ -171,27 +175,45 @@ void page_fault() {
 // sem_post to free up semaphore
     sem_post(&vmem->adm.sema);
 }
-// end signal processing section
+/* End Signal Processing */
 
 
-/*  Algorithm Section
-    contains: fifo, clock and clock 2 algorithms */
+
+/*  Algorithm
+    contains: fifo, clock and clock2 algorithm */
 
 int find_frame(){
+
     int frame = DUMMY_TAG;
-    if( vmem->adm.size < VMEM_NFRAMES ) {
+
+    if(vmem->adm.size < VMEM_NFRAMES) {
         frame = vmem->adm.size;
         vmem->adm.size += 1;
 
 #ifdef DEBUG_MESSAGES
-        fprintf(stderr, "UPDATE: New Frame: %d with free space\n", frame);
+        fprintf(stderr, "UPDATE: New Frame: %d\n", frame);
 #endif
 
+#ifdef FIFO
     } else {
-       frame = choose_algo();
+        frame = start_fifo();
+    }
+#endif
+
+#ifdef CLOCK
+    } else {
+        frame = start_clock();
+    }
+#endif
+
+#ifdef CLOCK2
+    } else {
+        frame = start_clock2();
+    }
+#endif
 
 #ifdef DEBUG_MESSAGES
-       fprintf(stderr, "UPDATE: New Frame: %d with algorithm\n", frame);
+       fprintf(stderr, "UPDATE: New Frame: %d\n", frame);
 #endif
 
     }
@@ -207,21 +229,10 @@ int find_frame(){
     return frame;
 }
 
-int choose_algo() {
-#ifdef FIFO
-    return start_fifo();
-#endif
-#ifdef CLOCK
-    return start_clock();
-#endif
-#ifdef CLOCK2
-    return start_clock2();
-#endif
-}
-
 int start_fifo() {
     int frame = vmem->adm.next_alloc_idx;
-    incr_alloc_idx();
+    vmem->adm.next_alloc_idx++;
+    vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
     return frame;
 }
 
@@ -229,19 +240,25 @@ int start_fifo() {
 int start_clock() {
     int frame = DUMMY_TAG;
 
-    while( frame == DUMMY_TAG ) {
-        int alloc_idx = vmem->adm.next_alloc_idx;
-        int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
-        int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
+    while(frame == DUMMY_TAG) {
 
-        if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
-            vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT1;
-            incr_alloc_idx();
+        int next_alloc_idx = vmem->adm.next_alloc_idx;
+        int framepage_by_idx = vmem->pt.framepage[next_alloc_idx];
+        int entry_flags = vmem->pt.entries[framepage_by_idx].flags;
+        int is_bit1_used = (entry_flags & PTF_USEDBIT1) == PTF_USEDBIT1;
+
+        if(is_bit1_used) {
+            vmem->pt.entries[framepage_by_idx].flags &= ~PTF_USEDBIT1;
+            vmem->adm.next_alloc_idx++;
+            vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
         } else {
-            frame = alloc_idx;
+            frame = next_alloc_idx;
         }
+
     }
-    incr_alloc_idx();
+
+    vmem->adm.next_alloc_idx++;
+    vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
 
     return frame;
 }
@@ -254,40 +271,42 @@ int start_clock() {
 int start_clock2() {
     int frame = DUMMY_TAG;
 
-    while( frame == DUMMY_TAG ) {
-    	int alloc_idx = vmem->adm.next_alloc_idx;
-    	int frame_by_alloc_idx = vmem->pt.framepage[alloc_idx];
-    	int flags = vmem->pt.entries[frame_by_alloc_idx].flags;
+    while(frame == DUMMY_TAG) {
 
-        if((flags & PTF_USEDBIT1) == PTF_USEDBIT1) {
-    	   int is_second_frame_flag_used = (flags & PTF_USEDBIT2) == PTF_USEDBIT2;
+        int next_alloc_idx = vmem->adm.next_alloc_idx;
+        int framepage_by_idx = vmem->pt.framepage[next_alloc_idx];
+        int entry_flags = vmem->pt.entries[framepage_by_idx].flags;
+        int is_bit1_used = (entry_flags & PTF_USEDBIT1) == PTF_USEDBIT1;
 
-    	   if( is_second_frame_flag_used ) {
-    	       vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT2;
+        if(is_bit1_used) {
+
+    	   int is_bit2_used = (entry_flags & PTF_USEDBIT2) == PTF_USEDBIT2;
+
+    	   if(is_bit2_used) {
+    	       vmem->pt.entries[framepage_by_idx].flags &= ~PTF_USEDBIT2;
     	   } else {
-    	       vmem->pt.entries[frame_by_alloc_idx].flags &= ~PTF_USEDBIT1;
+    	       vmem->pt.entries[framepage_by_idx].flags &= ~PTF_USEDBIT1;
     	   }
 
     	   // current frame was not eligible so we rotate to the next.
-    	   incr_alloc_idx();
+    	   vmem->adm.next_alloc_idx++;
+           vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
+
     	} else {
-    	   frame = alloc_idx;
+    	   frame = next_alloc_idx;
     	}
     }
-    incr_alloc_idx();
+
+    vmem->adm.next_alloc_idx++;
+    vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
 
     return frame;
 }
-
-void incr_alloc_idx() {
-    vmem->adm.next_alloc_idx++;
-    vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
-}
-/* End Algorithm Section */
+/* End Algorithm */
 
 
 
-/* Page Table Functions Section */
+/* Page Table Functions */
 void store_page(int page) {
     int frame_has_changed = (vmem->pt.entries[page].flags & PTF_CHANGED) == PTF_CHANGED;
     if(frame_has_changed) {
@@ -331,13 +350,13 @@ void update_pagetable(int frame){
     vmem->pt.entries[req_page].frame = frame;
     vmem->pt.entries[req_page].flags |= PTF_PRESENT;
 }
-/* End Page Table Functions Section */
+/* End Page Table Functions */
 
 
-/* Initialization Section */
-void vmem_init(){
 
-    shm_file_descriptor = shm_open(SHMKEY, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+/* Initialization */
+void vmem_init(int shm_file_descriptor){
+
     if(!shm_file_descriptor) {
     	perror("ATTENTION: Bad shared memory file descriptor!\n");
     	exit(EXIT_FAILURE);
@@ -360,7 +379,6 @@ void vmem_init(){
 
     vmem_init_null_data();
 
-    // initialize with semaphore(&sem, 1,0)
     int sem = sem_init(&vmem->adm.sema, 1, 0);
     if(sem != 0) {
     	perror("ATTENTION: Semaphor has not been initialized!\n");
@@ -427,11 +445,11 @@ void vmem_init_null_data(){
     vmem->adm.next_alloc_idx = 0;
     vmem->adm.pf_count = 0;
 }
-/* End Initialization Section */
+/* End Initialization */
 
 
 
-/* Administrative Functions Section */
+/* Administrative Functions */
 void print_vmem() {
     fprintf(stderr, "< adm_struct >\n");
     fprintf(stderr, "size: %d, pf_count: %d ",
@@ -445,7 +463,7 @@ void print_vmem() {
     }
 }
 
-void on_programm_finished(){
+void on_programm_finished(int shm_file_descriptor){
     // delete shared memory
     munmap(vmem, SHMSIZE);
     close(shm_file_descriptor);
@@ -457,11 +475,11 @@ void on_programm_finished(){
 
     printf("SUCESS: Succesful \n");
 }
-/* End Administrative Functions Section */
+/* End Administrative Functions */
 
 
 
-/* Logging Section */
+/* Logging */
 void open_logfile(){
     logfile = fopen(LOGFILE, "w");
     if(!logfile) {
@@ -485,3 +503,4 @@ logger(struct logevent le)
             le.replaced_page, le.req_pageno, le.alloc_frame);
     fflush(logfile);
 }
+

@@ -42,10 +42,6 @@ void init_pagetable_framepage_data();
 /* Algorithms */
 int find_frame(void);
 
-int choose_algo(void);
-
-void incr_alloc_idx();
-
 int start_fifo(void);
 
 int start_clock(void);
