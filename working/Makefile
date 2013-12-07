@@ -2,7 +2,7 @@ CC=/usr/bin/gcc
 CCFLAGS := -Wall -std=c99 -pthread
 LDFLAGS := -lpthread
 LRT := -lrt
-SOURCE_FLAGS := -D_XOPEN_SOURCE=600 # some libreries requier open source
+SOURCE_FLAGS := -D_XOPEN_SOURCE=600 # some libreries require open source
 
 CCFLAGS += -DFIFO
 #CCFLAGS += -DCLOCK

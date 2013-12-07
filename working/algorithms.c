@@ -1,7 +1,6 @@
 
 #include "algorithms.h"
 
-
 /*  Algorithm
     contains: fifo, clock and clock2 algorithm */
 
