@@ -346,8 +346,8 @@ void update_pagetable(int frame){
     // after deleting the reference we have to update the state
     int req_pageno = vmem->adm.req_pageno;
     vmem->pt.framepage[frame] = req_pageno;
-    vmem->pt.entries[req_page].frame = frame;
-    vmem->pt.entries[req_page].flags |= PTF_PRESENT;
+    vmem->pt.entries[req_pageno].frame = frame;
+    vmem->pt.entries[req_pageno].flags |= PTF_PRESENT;
 }
 /* End Page Table Functions */
 
