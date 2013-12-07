@@ -39,16 +39,6 @@ void vmem_init_null_data();
 void init_pagetable_framepage_data();
 
 
-/* Algorithms */
-int find_frame(void);
-
-int start_fifo(void);
-
-int start_clock(void);
-
-int start_clock2(void);
-
-
 /* Signals */
 void sighandler(int signo);
 
@@ -62,6 +52,7 @@ void init_pagefile();
 
 void page_fault();
 
+extern int find_frame(void);
 
 /* Administrative Procedures */
 #define LOGFILE "./logfile.txt"        /**< logfile name */
