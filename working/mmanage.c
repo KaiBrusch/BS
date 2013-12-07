@@ -189,34 +189,29 @@ int find_frame(){
     if(vmem->adm.size < VMEM_NFRAMES) {
         frame = vmem->adm.size;
         vmem->adm.size += 1;
-
-#ifdef DEBUG_MESSAGES
-        fprintf(stderr, "UPDATE: New Frame: %d\n", frame);
-#endif
+    }
 
 #ifdef FIFO
-    } else {
+    else {
         frame = start_fifo();
     }
 #endif
 
 #ifdef CLOCK
-    } else {
+    else {
         frame = start_clock();
     }
 #endif
 
 #ifdef CLOCK2
-    } else {
+    else {
         frame = start_clock2();
     }
 #endif
 
 #ifdef DEBUG_MESSAGES
-       fprintf(stderr, "UPDATE: New Frame: %d\n", frame);
+    fprintf(stderr, "UPDATE: New Frame: %d\n", frame);
 #endif
-
-    }
 
     if(frame == DUMMY_TAG) {
 
@@ -226,7 +221,9 @@ int find_frame(){
 
        exit(EXIT_FAILURE);
     }
+
     return frame;
+
 }
 
 int start_fifo() {
