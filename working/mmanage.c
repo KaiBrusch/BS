@@ -136,12 +136,12 @@ void sighandler(int signo) {
 void page_fault() {
     int new_page = DUMMY_TAG;
     int new_frame = DUMMY_TAG;
-    int req_page = vmem->adm.req_pageno;
+    int req_pageno = vmem->adm.req_pageno;
 
     // page fault debug message for log
 #ifdef DEBUG_MESSAGES
     fprintf(stderr, "\n ATTENTION: Pagefault Occured \n");
-    fprintf(stderr, "UPDATE: Requested Page: %d\n", req_page);
+    fprintf(stderr, "UPDATE: Requested Page: %d\n", req_pageno);
 #endif
 
     vmem->adm.pf_count++;
@@ -156,7 +156,7 @@ void page_fault() {
 
     update_pagetable(new_frame);
 
-    fetch_page(req_page);
+    fetch_page(req_pageno);
 
 
     // we are logging events to ensure transparency
@@ -172,7 +172,6 @@ void page_fault() {
     fprintf(stderr, "UPDATE: Page loaded. pf_count: %d\n", vmem->adm.pf_count);
 #endif
 
-// sem_post to free up semaphore
     sem_post(&vmem->adm.sema);
 }
 /* End Signal Processing */
@@ -227,10 +226,11 @@ int find_frame(){
 }
 
 int start_fifo() {
-    int frame = vmem->adm.next_alloc_idx;
+    int next_alloc_idx = vmem->adm.next_alloc_idx;
     vmem->adm.next_alloc_idx++;
+    // Rotate
     vmem->adm.next_alloc_idx%=(VMEM_NFRAMES);
-    return frame;
+    return next_alloc_idx;
 }
 
 //clock
@@ -305,8 +305,10 @@ int start_clock2() {
 
 /* Page Table Functions */
 void store_page(int page) {
-    int frame_has_changed = (vmem->pt.entries[page].flags & PTF_CHANGED) == PTF_CHANGED;
-    if(frame_has_changed) {
+
+    int is_changed_bit_set = (vmem->pt.entries[page].flags & PTF_CHANGED) == PTF_CHANGED;
+
+    if(is_changed_bit_set) {
         int frame = vmem->pt.entries[page].frame;
         // find position in pagefile for current frame
         fseek(pagefile, sizeof(int)*VMEM_PAGESIZE*page, SEEK_SET);
@@ -321,8 +323,8 @@ void store_page(int page) {
 void fetch_page(int page) {
     int frame = vmem->pt.entries[page].frame;
     fseek(pagefile, sizeof(int)*VMEM_PAGESIZE*page, SEEK_SET);
-    int readen_ints = fread(&vmem->data[VMEM_PAGESIZE*frame], sizeof(int), VMEM_PAGESIZE, pagefile);
-    if(readen_ints != VMEM_PAGESIZE) {
+    int read_from_page = fread(&vmem->data[VMEM_PAGESIZE*frame], sizeof(int), VMEM_PAGESIZE, pagefile);
+    if(read_from_page != VMEM_PAGESIZE) {
        perror("ATTENTION: Read was not successful!\n");
        exit(EXIT_FAILURE);
     }
@@ -342,8 +344,8 @@ void update_pagetable(int frame){
     vmem->pt.entries[oldpage].frame = DUMMY_TAG;
 
     // after deleting the reference we have to update the state
-    int req_page = vmem->adm.req_pageno;
-    vmem->pt.framepage[frame] = req_page;
+    int req_pageno = vmem->adm.req_pageno;
+    vmem->pt.framepage[frame] = req_pageno;
     vmem->pt.entries[req_page].frame = frame;
     vmem->pt.entries[req_page].flags |= PTF_PRESENT;
 }
@@ -391,12 +393,12 @@ void vmem_init(int shm_file_descriptor){
 }
 
 void init_pagefile() {
-    int no_elements = VMEM_NPAGES*VMEM_PAGESIZE;
-    int data[no_elements];
+    int total_number_of_items = VMEM_NPAGES*VMEM_PAGESIZE;
+    int data[total_number_of_items];
 
     srand(SEED_PF);
     // fill with random data. using our own rand_mod
-    for(int i=0; i < no_elements; i++) {
+    for(int i=0; i < total_number_of_items; i++) {
         data[i] = rand() % 1000;
     }
 
@@ -406,7 +408,7 @@ void init_pagefile() {
         exit(EXIT_FAILURE);
     }
 
-    int write_to_page = fwrite(data, sizeof(int), no_elements, pagefile);
+    int write_to_page = fwrite(data, sizeof(int), total_number_of_items, pagefile);
     if(!write_to_page) {
         perror("ATTENTION: Error creating pagefile!\n");
         exit(EXIT_FAILURE);
