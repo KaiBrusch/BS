@@ -26,7 +26,7 @@ struct logevent {
 };
 
 /* Virtual Memory */
-void vmem_init(void);
+void vmem_init(int shm_file_descriptor);
 
 void fetch_page(int pt_idx);
 
@@ -52,7 +52,7 @@ int start_clock2(void);
 /* Signals */
 void sighandler(int signo);
 
-void signal_loop(void);
+void signal_loop(int shm_file_descriptor);
 
 
 /* Physical Memory */
@@ -66,7 +66,7 @@ void page_fault();
 /* Administrative Procedures */
 #define LOGFILE "./logfile.txt"        /**< logfile name */
 
-void on_programm_finished();
+void on_programm_finished(int shm_file_descriptor);
 
 void logger(struct logevent le);
 
