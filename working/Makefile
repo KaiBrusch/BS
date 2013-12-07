@@ -27,5 +27,8 @@ mmanage.o: mmanage.c mmanage.h
 mmanage: mmanage.o
 	$(CC) $(LDFLAGS) -o mmanage mmanage.o $(LRT)
 
+algorithms.o: algorithms.c algorithms.h
+	$(CC) $(CCFLAGS) $(SOURCE_FLAGS) -c -o algorithms.o algorithms.c $(LRT)
+
 clean:
 	rm -f vmappl mmanage *.o logfile.txt pagefile.bin
