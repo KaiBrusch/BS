@@ -1,5 +1,14 @@
 #include "translate.h"
 
+// Module things
+// Metainformation
+MODULE_AUTHOR("Kai Brusch and Matthias Nitsche");
+MODULE_LICENSE("MIT");
+
+// module init and module exit procedures taken from scull
+module_init(translate_init);
+module_exit(translate_cleanup);
+
 // global variables 
 int translate_major;    // recieved major number
 struct translate_dev *translate_devs;    // translate device
@@ -12,9 +21,11 @@ static int translate_bufsize = STD_BUFFER_SIZE;
 module_param(translate_subst, charp, S_IRUGO);
 module_param(translate_bufsize, int, S_IRUGO);
 
+
+// Char manipulation
 void encode_char(char *write_pos) {
-    int index = encode_index_from_char(*write_pos);
-    if (index != NEUTRAL_CHAR_INDEX) {
+    int index = substr_index_from_char(*write_pos);
+    if (index != VOID_CHAR_IDX) {
         *write_pos = translate_subst[index];
     }
 }
@@ -23,34 +34,48 @@ void decode_char(char *read_pos) {
     char * pchar = strchr(translate_subst, *read_pos);
     // if the char was found in substr (aka, had been encoded)
     if (pchar != NULL) {
-	// then get the original char according to
-	// the position of the finding
-	
-	// calc the index using both pointers
+        // then get the original char according to
+        // the position of the finding
+        // calc the index using both pointers
         int index = pchar - translate_subst;
-	*read_pos = decode_from_index(index);
+        *read_pos = substr_char_from_index(index);
     }
 }
 
-char decode_from_index(int index) {
-    if( IS_IN_LOWER_CASE_SUBSTR(index) ) {
-	return (LOWER_CASE_ASCII + (index -LOWER_CASE_SUBSTR_OFFSET));
-    }
-    else {
-	return (UPPER_CASE_ASCII + (index - UPPER_CASE_SUBSTR_OFFSET));
+char substr_char_from_index(int index) {
+    if( is_in_lower_case_substr(index) ) {
+	   return (LOWER_CASE_A + index);
+    } else {
+	   return (UPPER_CASE_A + (index - UPPER_SUBSTR_OFFSET));
     }
 }
 
-int encode_index_from_char(char c) {
-    int result = NEUTRAL_CHAR_INDEX;
-    if (IS_UPPER_CASE(c)) {
-        result = c - UPPER_CASE_ASCII + UPPER_CASE_SUBSTR_OFFSET;
-    } else if (IS_LOWER_CASE(c)) {
-        result = c - LOWER_CASE_ASCII + LOWER_CASE_SUBSTR_OFFSET;
+int substr_index_from_char(char c) {
+    int result = VOID_CHAR_IDX;
+    switch( c ) {
+        case is_upper_case(c):
+            return c - UPPER_A_ASCII + UPPER_SUBSTR_OFFSET;
+        case is_lower_case(c):
+            return c - LOWER_A_ASCII;
+        default:
+            return result;
     }
-    return result;
 }
 
+int is_lower_case(char c){
+    return (c >= 'a') && (c <= 'z');
+}
+
+int is_upper_case(char c){
+    return (c >= 'A') && (c <= 'Z');
+}
+
+int is_in_lower_case_substr(int idx){
+    return (idx >= 0) && (idx < UPPER_SUBSTR_OFFSET)
+}
+
+
+// Device Transactions
 // open operation (taken from scull)
 int translate_open(struct inode *inode, struct file *filp) {
     struct translate_dev *dev = container_of(inode->i_cdev, struct translate_dev, cdev);
@@ -84,11 +109,12 @@ int translate_open(struct inode *inode, struct file *filp) {
 // close file operation.
 // simply check which mode the user was in and decrease the corresponding
 // semaphore. this then allows others to read/write
-int translate_close(struct inode *inode, struct file *filp) {
+int translate_release(struct inode *inode, struct file *filp) {
     struct translate_dev *dev = filp->private_data;
     
     DEBUG(printk(KERN_NOTICE "translate_close()\n"));
     
+    // READ Modus prüfen xx Swaneet
     if ((filp->f_mode & FMODE_WRITE) == FMODE_WRITE) {
         
         up(&dev->writer_open_lock);
@@ -99,7 +125,7 @@ int translate_close(struct inode *inode, struct file *filp) {
 }
 
 // implementation of what happens when someone now wants to write
-// into our device. we got much help form others groups here.
+// xx Swaneet - into our device. we got much help form others groups here.
 ssize_t translate_write(struct file *filp, const char __user *buf,
 			size_t count, loff_t *f_pos) {
     struct translate_dev *dev = filp->private_data;
@@ -143,10 +169,10 @@ ssize_t translate_write(struct file *filp, const char __user *buf,
         dev->write_pos = dev->buffer + ((p_writer + 1) % translate_bufsize)* sizeof(char);
         p_writer = (dev->write_pos - dev->buffer) / sizeof(char);
         buf += sizeof(char);
-	
-	// update counters
+
+        // update counters
         num_copied_items++;
-	dev->items++;
+        dev->items++;
     }
 
     return num_copied_items;
@@ -154,7 +180,7 @@ ssize_t translate_write(struct file *filp, const char __user *buf,
 
 // implementation of what happens when someone now wants to read
 // into our device. we got much help form others groups here.
-// this is very similar to the write process
+// xx Swaneet - this is very similar to the write process
 ssize_t translate_read(struct file *filp, char __user *buf,
 		       size_t count,loff_t *f_pos) {
     struct translate_dev *dev = filp->private_data;
@@ -194,7 +220,7 @@ ssize_t translate_read(struct file *filp, char __user *buf,
     return num_copied_items;
 }
 
-// called from kernel to initialize translate module. taken from scull
+// xx Swaneet - called from kernel to initialize translate module. taken from scull
 static int translate_init(void) {
     int result = EXIT_SUCCESS, i;
     dev_t dev;
@@ -224,24 +250,24 @@ static int translate_init(void) {
 
     // initialize each device (in translate its only two)
     for (i = 0; i < NO_OF_DEVICES; i++) {
-	struct translate_dev *dev = &translate_devs[i];
-	// allocate buffer (just like with the device memory)
-	dev->buffer = kmalloc(translate_bufsize, GFP_KERNEL);
-	if (!(dev->buffer)) {
-	    result = -ENOMEM;
-	    goto fail;
-	}
-	
-	dev->items = 0;
-	dev->read_pos = dev->buffer;
-	dev->write_pos = dev->buffer;
-	
-	// init semaphores
-	sema_init(&dev->reader_open_lock, NUM_SIMULT_ACCESS_USERS);
-	sema_init(&dev->writer_open_lock, NUM_SIMULT_ACCESS_USERS);
-	
-	translate_setup_cdev(&translate_devs[i], i);
-	DEBUG(printk(KERN_NOTICE "translate_init: translate dev %d initialized", i));
+        struct translate_dev *dev = &translate_devs[i];
+        // allocate buffer (just like with the device memory)
+        dev->buffer = kmalloc(translate_bufsize, GFP_KERNEL);
+    	if (!(dev->buffer)) {
+    	    result = -ENOMEM;
+    	    goto fail;
+    	}
+    	
+    	dev->items = 0;
+    	dev->read_pos = dev->buffer;
+    	dev->write_pos = dev->buffer;
+    	
+    	// init semaphores
+    	sema_init(&dev->reader_open_lock, 1);
+    	sema_init(&dev->writer_open_lock, 1);
+    	
+    	translate_setup_cdev(&translate_devs[i], i);
+    	DEBUG(printk(KERN_NOTICE "translate_init: translate dev %d initialized", i));
     }
     
     DEBUG(printk(KERN_NOTICE "translate_init: translate initialized"));
@@ -264,7 +290,6 @@ static void translate_setup_cdev(struct translate_dev *dev, int index) {
     
     result = cdev_add(&dev->cdev, devno, 1);
 
-    
     if (result) {
         DEBUG(printk(KERN_NOTICE "Error(%d): adding translate dev %d \n", result, index));
     }
@@ -277,7 +302,7 @@ static void translate_cleanup(void) {
     DEBUG(printk(KERN_NOTICE "translate_cleanup()\n"));
     if (translate_devs != NULL) {
         for (i = 0; i < NO_OF_DEVICES; i++) {
-	    cleanup_single_translate_dev(i);
+	       cleanup_single_translate_dev(i);
         }
         // free device memory
         kfree(translate_devs);
@@ -285,7 +310,7 @@ static void translate_cleanup(void) {
     unregister_chrdev_region(dev, NO_OF_DEVICES);
 }
 
-
+// xx Swaneet refactor
 static void cleanup_single_translate_dev(int i) {
     struct translate_dev *dev = &(translate_devs[i]);
     // free Buffer
@@ -298,3 +323,5 @@ static void cleanup_single_translate_dev(int i) {
     cdev_del(&dev->cdev);
     DEBUG(printk(KERN_NOTICE "translate_cleanup: kfree'd translate dev %d\n", i));
 }
+
+
