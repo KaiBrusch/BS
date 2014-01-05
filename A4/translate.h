@@ -63,7 +63,6 @@ ssize_t translate_read(struct file *filp, char __user *buf, size_t count,loff_t 
 static int translate_init(void);
 static void translate_cleanup(void);
 static void translate_setup_cdev(struct translate_dev *dev, int index);
-static void cleanup_single_translate_dev(int i);  // cleanup the device of the given index
 
 // Echte Anwendungsfunktionen
 int substr_index_from_char(char c);
