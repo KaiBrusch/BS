@@ -1,17 +1,16 @@
 #include "translate.h"
 
-// Module things
-// Metainformation
+// Modulinformationen
 MODULE_AUTHOR("Kai Brusch and Matthias Nitsche");
 MODULE_LICENSE("MIT");
 
-// module init and module exit procedures taken from scull
+// Die initialisierung des Modules wurde aus scull uebernommen
 module_init(translate_init);
 module_exit(translate_cleanup);
 
-// global variables 
-int translate_major;    // recieved major number
-struct translate_dev *translate_devs;    // translate device
+// Globale Variablen 
+int translate_major;    // Mayor Numbers
+struct translate_dev *translate_devs;    // Uebersetzungs Device
 
 // translate parameters (and default values)
 static char *translate_subst = STD_TRANSLATE_SUBSTR;
@@ -174,7 +173,7 @@ ssize_t translate_write(struct file *filp, const char __user *buf,
         
         // if we're the translate0 device
         // then encode during writing from user into device
-        if (MINOR(dev->cdev.dev) == MINOR_BEGINNING) {
+        if (MINOR(dev->cdev.dev) == MINOR_START_IDX) {
             encode_char(dev->write_pos);
         }
         
@@ -221,7 +220,7 @@ ssize_t translate_read(struct file *filp, char __user *buf,
 	// we'll decode our buffer (if translate1) and THEN hand it over to the user.
         
         // if the device is translate1, then decode
-        if (MINOR(dev->cdev.dev) == (MINOR_BEGINNING + 1)) {
+        if (MINOR(dev->cdev.dev) == (MINOR_START_ID + 1)) {
             decode_char(dev->read_pos);
         }
         
@@ -253,7 +252,7 @@ static int translate_init(void) {
     printk(KERN_NOTICE "translate_init: param bufsize = %d \n",translate_bufsize);
 #endif
 
-    result = alloc_chrdev_region(&dev, MINOR_BEGINNING, NO_OF_DEVICES,"translate\n");
+    result = alloc_chrdev_region(&dev, MINOR_START_IDX, NO_OF_DEVICES,"translate\n");
     translate_major = MAJOR(dev);
 
     if (result != EXIT_SUCCESS) {
@@ -314,7 +313,7 @@ static int translate_init(void) {
 
 // setup char device (taken form scull)
 static void translate_setup_cdev(struct translate_dev *dev, int index) {
-    int result = EXIT_SUCCESS, devno = MKDEV(translate_major, MINOR_BEGINNING + index);
+    int result = EXIT_SUCCESS, devno = MKDEV(translate_major, MINOR_START_IDX + index);
     
 #ifdef DEBUG_MESSAGES
     printk(KERN_NOTICE "translate_setup_cdev()\n");
@@ -337,7 +336,7 @@ static void translate_setup_cdev(struct translate_dev *dev, int index) {
 
 // cleanup procedure. taken from scull
 static void translate_cleanup(void) {
-    dev_t dev = MKDEV(translate_major, MINOR_BEGINNING);
+    dev_t dev = MKDEV(translate_major, MINOR_START_IDX;
     int i;
 
 #ifdef DEBUG_MESSAGES
