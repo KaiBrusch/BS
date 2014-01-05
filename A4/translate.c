@@ -44,22 +44,20 @@ void decode_char(char *read_pos) {
 
 char substr_char_from_index(int index) {
     if( is_in_lower_case_substr(index) ) {
-	   return (LOWER_CASE_A + index);
+	   return (LOWER_A_ASCII + index);
     } else {
-	   return (UPPER_CASE_A + (index - UPPER_SUBSTR_OFFSET));
+	   return (UPPER_A_ASCII + (index - UPPER_SUBSTR_OFFSET));
     }
 }
 
 int substr_index_from_char(char c) {
     int result = VOID_CHAR_IDX;
-    switch( c ) {
-        case is_upper_case(c):
-            return c - UPPER_A_ASCII + UPPER_SUBSTR_OFFSET;
-        case is_lower_case(c):
-            return c - LOWER_A_ASCII;
-        default:
-            return result;
+    if( is_lower_case(c) ){
+        return c - LOWER_A_ASCII;
+    } else if( is_upper_case(c) ){
+        return c - UPPER_A_ASCII + UPPER_SUBSTR_OFFSET;
     }
+    return result;
 }
 
 int is_lower_case(char c){
