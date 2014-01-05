@@ -24,9 +24,9 @@ module_param(translate_bufsize, int, S_IRUGO);
 
 // Char manipulation
 void encode_char(char *write_pos) {
-    int index = substr_index_from_char(*write_pos);
-    if (index != VOID_CHAR_IDX) {
-        *write_pos = translate_subst[index];
+    int idx = substr_index_from_char(*write_pos);
+    if (idx != VOID_CHAR_IDX) {
+        *write_pos = translate_subst[idx];
     }
 }
 
@@ -42,11 +42,11 @@ void decode_char(char *read_pos) {
     }
 }
 
-char substr_char_from_index(int index) {
-    if( is_in_lower_case_substr(index) ) {
-	   return (LOWER_A_ASCII + index);
+char substr_char_from_index(int idx) {
+    if( is_in_lower_case_substr(idx) ) {
+	   return (LOWER_A_ASCII + idx);
     } else {
-	   return (UPPER_A_ASCII + (index - UPPER_SUBSTR_OFFSET));
+	   return (UPPER_A_ASCII + (idx - UPPER_SUBSTR_OFFSET));
     }
 }
 
@@ -123,7 +123,6 @@ int translate_release(struct inode *inode, struct file *filp) {
     printk(KERN_NOTICE "translate_close()\n");
 #endif
     
-    // READ Modus prüfen xx Swaneet
     if ((filp->f_mode & FMODE_WRITE) == FMODE_WRITE) {
         up(&dev->writer_open_lock);
     } else {
@@ -133,7 +132,7 @@ int translate_release(struct inode *inode, struct file *filp) {
 }
 
 // implementation of what happens when someone now wants to write
-// xx Swaneet - into our device. we got much help form others groups here.
+// into our device. we got much help form others groups here.
 ssize_t translate_write(struct file *filp, const char __user *buf,
 			size_t count, loff_t *f_pos) {
     struct translate_dev *dev = filp->private_data;
@@ -197,7 +196,7 @@ ssize_t translate_write(struct file *filp, const char __user *buf,
 
 // implementation of what happens when someone now wants to read
 // into our device. we got much help form others groups here.
-// xx Swaneet - this is very similar to the write process
+// this is very similar to the write process
 ssize_t translate_read(struct file *filp, char __user *buf,
 		       size_t count,loff_t *f_pos) {
     struct translate_dev *dev = filp->private_data;
@@ -243,7 +242,7 @@ ssize_t translate_read(struct file *filp, char __user *buf,
     return num_copied_items;
 }
 
-// xx Swaneet - called from kernel to initialize translate module. taken from scull
+// called from kernel to initialize translate module. taken from scull
 static int translate_init(void) {
     int result = EXIT_SUCCESS, i;
     dev_t dev;
