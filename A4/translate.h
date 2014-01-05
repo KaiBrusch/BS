@@ -40,15 +40,6 @@
 #define EXIT_SUCCESS 0
 #define VOID_CHAR_IDX (-1)
 
-// for debugging
-#ifdef DEBUG_MESSAGES
-#define DEBUG(A) printk(KERN_NOTICE "<translate>:");A
-#endif
-
-#ifndef DEBUG_MESSAGES
-#define DEBUG(A) 
-#endif
-
 // each of our devices have this
 struct translate_dev {
 	char *buffer;	// pointer to the buffer
