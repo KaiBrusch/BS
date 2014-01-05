@@ -69,7 +69,7 @@ int is_upper_case(char c){
 }
 
 int is_in_lower_case_substr(int idx){
-    return (idx >= 0) && (idx < UPPER_SUBSTR_OFFSET)
+    return (idx >= 0) && (idx < UPPER_SUBSTR_OFFSET);
 }
 
 
