@@ -16,55 +16,27 @@
 #include <asm/uaccess.h>	// copy_from_user()
 #include <linux/string.h>       // strchr(), strlen()
 
-// Translate DEFINE
-// standardmaessig ist der Buffer 40
+// standard größe des Buffers 40
 #define STD_BUFFER_SIZE 40
 
-// der default translate substring
-#define STD_TRANSLATE_SUBSTR "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"    //standard subst
+#define STD_TRANSLATE_SUBSTR "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 #define SUBSTR_SIZE (strlen(translate_subst))
 
-// die minor nummern beginnen ab 0
-#define MINOR_BEGINNING 0
-
-// wir haben die devices translate0 und translate1
-#define NO_OF_DEVICES 2
-
-// offset for lower case characters
+// offset für Alphabet Grenzen
 #define LOWER_A_ASCII 'a'
 #define UPPER_A_ASCII 'A'
-
 #define UPPER_SUBSTR_OFFSET (SUBSTR_SIZE/2)
 
-// misc
+// Minor hat bei uns den channel 0 und 1
+#define MINOR_START_IDX 0
+// translate0 und translate1 = 2 devices
+#define NO_OF_DEVICES 2
+
+// Sonstiges
 #define EXIT_SUCCESS 0
 #define VOID_CHAR_IDX (-1)
 
-// each of our devices have this
-struct translate_dev {
-	char *buffer;	// pointer to the buffer
-	int items;	// # of items
-	char *read_pos;	// current reading position
-	char *write_pos;// current writing position
-	struct cdev cdev;// char device
-	struct semaphore writer_open_lock;	// mutex for writing
-	struct semaphore reader_open_lock;	// mutex for reading
-};
-
-
-// Translate fileoperations (auch aus scull ueberneommen)
-int translate_open(struct inode *inode, struct file *filp);
-int translate_release(struct inode *inode, struct file *filp);
-ssize_t translate_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos);
-ssize_t translate_read(struct file *filp, char __user *buf, size_t count,loff_t *f_pos);
-
-
-// Install/Uninstall (oriented on scull)
-static int translate_init(void);
-static void translate_cleanup(void);
-static void translate_setup_cdev(struct translate_dev *dev, int index);
-
-// Echte Anwendungsfunktionen
+// Charakter Manipulation und Codierung
 int substr_index_from_char(char c);
 void encode_char(char *write_pos);
 char substr_char_from_index(int index);
@@ -74,7 +46,31 @@ int is_upper_case(char c);
 int is_in_lower_case_substr(int idx);
 
 
-// file_operations interface implementieren
+// alle devices haben dieses standard interface
+struct translate_dev {
+	char *buffer;	// pointer zu dem buffer
+	int items;
+	char *read_pos;	// aktueller lese pointer
+	char *write_pos;// aktueller schreibe pointer
+	struct cdev cdev;// Charakter device
+	struct semaphore writer_open_lock;
+	struct semaphore reader_open_lock;
+};
+
+// Translate Operationen nach Scull
+int translate_open(struct inode *inode, struct file *filp);
+int translate_release(struct inode *inode, struct file *filp);
+ssize_t translate_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos);
+ssize_t translate_read(struct file *filp, char __user *buf, size_t count,loff_t *f_pos);
+
+
+// Translate Install/Uninstall nach Scull
+static int translate_init(void);
+static void translate_cleanup(void);
+static void translate_setup_cdev(struct translate_dev *dev, int index);
+
+
+// Dateioperationen als Interface
 struct file_operations translate_ops = {
     .owner = THIS_MODULE,
     .open  = translate_open,
