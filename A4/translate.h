@@ -22,7 +22,7 @@
 
 // der default translate substring
 #define STD_TRANSLATE_SUBSTR "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"    //standard subst
-#define TRANSLATE_SUBSTR_LEN (strlen(translate_subst))
+#define SUBSTR_SIZE (strlen(translate_subst))
 
 // die minor nummern beginnen ab 0
 #define MINOR_BEGINNING 0
@@ -30,26 +30,15 @@
 // wir haben die devices translate0 und translate1
 #define NO_OF_DEVICES 2
 
-// helper macros
-#define IS_LOWER_CASE(c) ((c) >= 'a' && (c) <= 'z')
-#define IS_UPPER_CASE(c) ((c) >= 'A' && (c) <= 'Z')
-
-// only one user may use a devices read/write 'port' at a time
-#define NUM_SIMULT_ACCESS_USERS 1
-
 // offset for lower case characters
-#define LOWER_CASE_ASCII 'a'
-#define UPPER_CASE_ASCII 'A'
+#define LOWER_A_ASCII 'a'
+#define UPPER_A_ASCII 'A'
 
-// the encoding for lower case chars being at 0
-// the encoding for upper case chars begins at the middle
-#define LOWER_CASE_SUBSTR_OFFSET 0
-#define UPPER_CASE_SUBSTR_OFFSET (TRANSLATE_SUBSTR_LEN/2)
-#define IS_IN_LOWER_CASE_SUBSTR(A) ((A) >= LOWER_CASE_SUBSTR_OFFSET && (A) < UPPER_CASE_SUBSTR_OFFSET)
+#define UPPER_SUBSTR_OFFSET (SUBSTR_SIZE/2)
 
 // misc
 #define EXIT_SUCCESS 0
-#define NEUTRAL_CHAR_INDEX -1
+#define VOID_CHAR_IDX (-1)
 
 // for debugging
 #ifdef DEBUG_MESSAGES
@@ -74,7 +63,7 @@ struct translate_dev {
 
 // Translate fileoperations (auch aus scull ueberneommen)
 int translate_open(struct inode *inode, struct file *filp);
-int translate_close(struct inode *inode, struct file *filp);
+int translate_release(struct inode *inode, struct file *filp);
 ssize_t translate_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos);
 ssize_t translate_read(struct file *filp, char __user *buf, size_t count,loff_t *f_pos);
 
@@ -86,29 +75,23 @@ static void translate_setup_cdev(struct translate_dev *dev, int index);
 static void cleanup_single_translate_dev(int i);  // cleanup the device of the given index
 
 // Echte Anwendungsfunktionen
-int encode_index_from_char(char c);
+int substr_index_from_char(char c);
 void encode_char(char *write_pos);
-char decode_from_index(int index);
+char substr_char_from_index(int index);
 void decode_char(char *read_pos);
+int is_lower_case(char c);
+int is_upper_case(char c);
+int is_in_lower_case_substr(int idx);
 
 
 // file_operations interface implementieren
 struct file_operations translate_ops = {
     .owner = THIS_MODULE,
     .open  = translate_open,
-    .release = translate_close,
+    .release = translate_release,
     .write = translate_write,
     .read  = translate_read
 };
-
-// Module things
-// Metainformation
-MODULE_AUTHOR("Swaneet Sahoo and Ivan Morozov");
-MODULE_LICENSE("Beer Licence");
-
-// module init and module exit procedures taken from scull
-module_init(translate_init);
-module_exit(translate_cleanup);
 
 
 #endif
