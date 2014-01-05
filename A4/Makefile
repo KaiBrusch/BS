@@ -18,7 +18,7 @@ else
 
 # Hinweise zu dieser Ersetztung im Entwurf/Protokoll.
 # KERNELDIR ?= /lib/modules/$(shell uname -r)/build
-KERNELDIR ?= /lib/modules/3.7.10-1.24-default/build
+KERNELDIR ?= /lib/modules/3.11.6-4-desktop/build
 PWD       := $(shell pwd)
 
 modules:
