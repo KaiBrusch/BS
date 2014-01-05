@@ -1,5 +1,5 @@
 #!/bin/sh
-module="translate"	# Name des Moduls
+module="translate"	# name of module
 device="translate"	# Prefix der beiden Devices
 mode="664"
 

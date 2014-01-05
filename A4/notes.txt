@@ -101,7 +101,7 @@ Dort ist nachwievor kein /build ordner vorhanden.
 
 jedoch wenn man manuell diesen pfad verwendet,
 funktioniert das kompillieren:
-"3.7.10-1.24-default"
+3.11.6-4-default//"3.7.10-1.24-default"
 Dieser Pfad steht also nun im Makefile drinnen.
 
 
