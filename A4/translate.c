@@ -79,9 +79,11 @@ int translate_open(struct inode *inode, struct file *filp) {
     struct translate_dev *dev = container_of(inode->i_cdev, struct translate_dev, cdev);
     // makes a pointer to the device from a 'complicated' inode
     filp->private_data = dev;
-    
-    DEBUG(printk(KERN_NOTICE "translate_open()\n"));
-    
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_open()\n");
+#endif   
+
     // we check whether the user is in write or read mode.
     // then we try to access the corresponding part of the device
     // if the device is free for writing/reading
@@ -90,13 +92,20 @@ int translate_open(struct inode *inode, struct file *filp) {
 	// semaphore value. If we succeed, we may use it.
 	// else we say, that the device is busy.
         if (down_trylock(&dev->writer_open_lock) != 0) {
-            DEBUG(printk(KERN_NOTICE "translate_open: device already being written onto.\n"));
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_open: device already being written onto.\n");
+#endif
             return -EBUSY;
         }
     } else {
 	// same goes for reading
         if (down_trylock(&dev->reader_open_lock) != 0) {
-            DEBUG(printk(KERN_NOTICE "translate_open: device already being read from.\n"));
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_open: device already being read from.\n");
+#endif
+
             return -EBUSY;
         }
     }
@@ -109,12 +118,13 @@ int translate_open(struct inode *inode, struct file *filp) {
 // semaphore. this then allows others to read/write
 int translate_release(struct inode *inode, struct file *filp) {
     struct translate_dev *dev = filp->private_data;
-    
-    DEBUG(printk(KERN_NOTICE "translate_close()\n"));
+
+#ifdef DEBUG_MESSAGES    
+    printk(KERN_NOTICE "translate_close()\n");
+#endif
     
     // READ Modus prüfen xx Swaneet
     if ((filp->f_mode & FMODE_WRITE) == FMODE_WRITE) {
-        
         up(&dev->writer_open_lock);
     } else {
         up(&dev->reader_open_lock);
@@ -133,14 +143,20 @@ ssize_t translate_write(struct file *filp, const char __user *buf,
     int p_writer = (dev->write_pos - dev->buffer) / sizeof(char);
     
     int num_copied_items = 0;	// tracks the progress of the # of copied items
-    
-    DEBUG(printk(KERN_NOTICE "translate_write()\n"));
-    
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_write()\n");
+#endif   
+
     while (num_copied_items < count) {
 	// decrease the semaphore
 	// if the buffer is full, this fails.
 	if (dev->items == translate_bufsize) {
-	    DEBUG(printk(KERN_NOTICE "translate_write: buffer is full. copied %d items \n",num_copied_items));
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_write: buffer is full. copied %d items \n",num_copied_items);
+#endif
+
 	    return num_copied_items;
 	}
 	
@@ -149,7 +165,10 @@ ssize_t translate_write(struct file *filp, const char __user *buf,
         
         // now copy a single character from the user
         if (copy_from_user(dev->write_pos, buf, 1)){
-                DEBUG(printk(KERN_NOTICE "translate_write: copy_from_user failed \n"));
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_write: copy_from_user failed \n");
+#endif
 		// free semaphore again and end
                 return -EFAULT;
         }
@@ -185,11 +204,17 @@ ssize_t translate_read(struct file *filp, char __user *buf,
     int num_copied_items = 0;
     int p_reader = (dev->read_pos - dev->buffer) / sizeof(char);
 
-    DEBUG(printk(KERN_NOTICE "translate_read()\n"));
-    
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_read()\n");
+#endif
+
     while (num_copied_items < count) {
         if (dev->items == 0) {
-	    DEBUG(printk(KERN_NOTICE "translate_read: buffer empty, read %d chars \n",num_copied_items));
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_read: buffer empty, read %d chars \n",num_copied_items);
+#endif
+
 	    return num_copied_items;
 	}
 	
@@ -222,17 +247,23 @@ ssize_t translate_read(struct file *filp, char __user *buf,
 static int translate_init(void) {
     int result = EXIT_SUCCESS, i;
     dev_t dev;
-    
-    DEBUG(printk(KERN_NOTICE "translate_init()\n"));
-    DEBUG(printk(KERN_NOTICE "translate_init: param subst = %s \n",translate_subst));
-    DEBUG(printk(KERN_NOTICE "translate_init: param bufsize = %d \n",translate_bufsize));
-    
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_init()\n");
+    printk(KERN_NOTICE "translate_init: param subst = %s \n",translate_subst);
+    printk(KERN_NOTICE "translate_init: param bufsize = %d \n",translate_bufsize);
+#endif
+
     result = alloc_chrdev_region(&dev, MINOR_BEGINNING, NO_OF_DEVICES,"translate\n");
     translate_major = MAJOR(dev);
 
     if (result != EXIT_SUCCESS) {
-	DEBUG(printk(KERN_ALERT "translate_init: error(%d) getting major %d \n",
-		result, translate_major));
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_ALERT "translate_init: error(%d) getting major %d \n",
+		result, translate_major);
+#endif
+
 	return result;
     }
 
@@ -265,11 +296,17 @@ static int translate_init(void) {
     	sema_init(&dev->writer_open_lock, 1);
     	
     	translate_setup_cdev(&translate_devs[i], i);
-    	DEBUG(printk(KERN_NOTICE "translate_init: translate dev %d initialized", i));
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_init: translate dev %d initialized", i);
+#endif
+
     }
-    
-    DEBUG(printk(KERN_NOTICE "translate_init: translate initialized"));
-    
+
+#ifdef DEBUG_MESSAGES    
+    printk(KERN_NOTICE "translate_init: translate initialized");
+#endif
+
     return EXIT_SUCCESS;
 
     fail: translate_cleanup();
@@ -280,8 +317,10 @@ static int translate_init(void) {
 static void translate_setup_cdev(struct translate_dev *dev, int index) {
     int result = EXIT_SUCCESS, devno = MKDEV(translate_major, MINOR_BEGINNING + index);
     
-    DEBUG(printk(KERN_NOTICE "translate_setup_cdev()\n"));
-    
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_setup_cdev()\n");
+#endif
+
     cdev_init(&dev->cdev, &translate_ops);
     dev->cdev.owner = THIS_MODULE;
     dev->cdev.ops = &translate_ops;
@@ -289,7 +328,11 @@ static void translate_setup_cdev(struct translate_dev *dev, int index) {
     result = cdev_add(&dev->cdev, devno, 1);
 
     if (result) {
-        DEBUG(printk(KERN_NOTICE "Error(%d): adding translate dev %d \n", result, index));
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "Error(%d): adding translate dev %d \n", result, index);
+#endif
+
     }
 }
 
@@ -297,7 +340,11 @@ static void translate_setup_cdev(struct translate_dev *dev, int index) {
 static void translate_cleanup(void) {
     dev_t dev = MKDEV(translate_major, MINOR_BEGINNING);
     int i;
-    DEBUG(printk(KERN_NOTICE "translate_cleanup()\n"));
+
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_cleanup()\n");
+#endif
+
     if (translate_devs != NULL) {
         for (i = 0; i < NO_OF_DEVICES; i++) {
 	       cleanup_single_translate_dev(i);
@@ -319,7 +366,11 @@ static void cleanup_single_translate_dev(int i) {
     dev->buffer = NULL;
     // delete char dev
     cdev_del(&dev->cdev);
-    DEBUG(printk(KERN_NOTICE "translate_cleanup: kfree'd translate dev %d\n", i));
+    
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_cleanup: kfree'd translate dev %d\n", i);
+#endif
+
 }
 
 
