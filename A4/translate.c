@@ -347,30 +347,25 @@ static void translate_cleanup(void) {
 
     if (translate_devs != NULL) {
         for (i = 0; i < NO_OF_DEVICES; i++) {
-	       cleanup_single_translate_dev(i);
+
+            struct translate_dev *dev = &(translate_devs[i]);
+            // free Buffer
+            kfree(dev->buffer);
+            // reset pointers
+            dev->read_pos = NULL;
+            dev->write_pos = NULL;
+            dev->buffer = NULL;
+            // delete char dev
+            cdev_del(&dev->cdev);
+    
+#ifdef DEBUG_MESSAGES
+    printk(KERN_NOTICE "translate_cleanup: kfree'd translate dev %d\n", i);
+#endif
+
         }
         // free device memory
         kfree(translate_devs);
     }
     unregister_chrdev_region(dev, NO_OF_DEVICES);
 }
-
-// xx Swaneet refactor
-static void cleanup_single_translate_dev(int i) {
-    struct translate_dev *dev = &(translate_devs[i]);
-    // free Buffer
-    kfree(dev->buffer);
-    // reset pointers
-    dev->read_pos = NULL;
-    dev->write_pos = NULL;
-    dev->buffer = NULL;
-    // delete char dev
-    cdev_del(&dev->cdev);
-    
-#ifdef DEBUG_MESSAGES
-    printk(KERN_NOTICE "translate_cleanup: kfree'd translate dev %d\n", i);
-#endif
-
-}
-
 
